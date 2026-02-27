@@ -1,8 +1,8 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
-from flask_mysqldb import MySQL
+import pymysql
+import pymysql.cursors
 from werkzeug.utils import secure_filename
-import MySQLdb.cursors
 import requests
 import qrcode
 import io
@@ -10,8 +10,6 @@ import socket
 import google.generativeai as genai
 import cloudinary
 import cloudinary.uploader
-
-
 
 app = Flask(__name__)
 
@@ -23,14 +21,8 @@ app.config['MYSQL_HOST'] = os.getenv('DB_HOST', 'agrisetudb-agrisetudb.h.aivencl
 app.config['MYSQL_USER'] = os.getenv('DB_USER', 'avnadmin')
 app.config['MYSQL_PASSWORD'] = os.getenv('DB_PASSWORD', 'AVNS_PUGOsGEP-oq6K6NtATL')
 app.config['MYSQL_DB'] = os.getenv('DB_NAME', 'defaultdb')
-app.config['MYSQL_PORT'] = int(os.getenv('DB_PORT', 13782)) # Replace 13782 with your exact Aiven port
+app.config['MYSQL_PORT'] = int(os.getenv('DB_PORT', 13782)) 
 
-# This tells Flask-MySQLdb to use the SSL certificate you just moved
-app.config['MYSQL_CUSTOM_OPTIONS'] = {
-    'ssl': {
-        'ca': 'ca.pem'
-    }
-}
 # Cloudinary Configuration
 cloudinary.config( 
   cloud_name = "dfmekdssr", 
@@ -41,9 +33,19 @@ cloudinary.config(
 # Image Upload Config
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
-mysql = MySQL(app)
+# --- NEW PYMYSQL CONNECTION HELPER ---
+def get_db_connection(dict_cursor=False):
+    return pymysql.connect(
+        host=app.config['MYSQL_HOST'],
+        user=app.config['MYSQL_USER'],
+        password=app.config['MYSQL_PASSWORD'],
+        database=app.config['MYSQL_DB'],
+        port=app.config['MYSQL_PORT'],
+        ssl={"ca": "ca.pem"},
+        cursorclass=pymysql.cursors.DictCursor if dict_cursor else pymysql.cursors.Cursor
+    )
 
-# Setup Gemini AI (Replace with your actual key from Step 1)
+# Setup Gemini AI 
 GEMINI_API_KEY = "AIzaSyDLfS83DwbcCyP3o0O_m6tkHN8I8BE0ebM"
 genai.configure(api_key=GEMINI_API_KEY)
 
@@ -83,10 +85,14 @@ def login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        
+        connection = get_db_connection(dict_cursor=True)
+        cursor = connection.cursor()
         cursor.execute('SELECT * FROM users WHERE email = %s AND password = %s', (email, password))
         account = cursor.fetchone()
         cursor.close()
+        connection.close()
+        
         if account:
             session['loggedin'] = True
             session['id'] = account['id']
@@ -104,15 +110,20 @@ def register():
         email = request.form['email']
         password = request.form['password']
         role = request.form['role']
-        cursor = mysql.connection.cursor()
+        
+        connection = get_db_connection()
+        cursor = connection.cursor()
         cursor.execute('SELECT * FROM users WHERE username = %s OR email = %s', (username, email))
         if cursor.fetchone():
             flash('Account already exists!')
+            cursor.close()
+            connection.close()
         else:
             cursor.execute('INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)', (username, email, password, role))
-            mysql.connection.commit()
+            connection.commit()
+            cursor.close()
+            connection.close()
             return redirect(url_for('login'))
-        cursor.close()
     return render_template('register.html')
 
 @app.route('/logout')
@@ -139,7 +150,9 @@ def get_ip_address():
 @app.route('/farmer_dashboard')
 def farmer_dashboard():
     if 'loggedin' in session and session['role'] == 'Farmer':
-        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        connection = get_db_connection(dict_cursor=True)
+        cursor = connection.cursor()
+        
         cursor.execute('SELECT * FROM marketplace WHERE farmer_id = %s', (session['id'],))
         my_listings = cursor.fetchall() or []
         cursor.execute('SELECT * FROM orders WHERE farmer_id = %s ORDER BY order_date DESC LIMIT 5', (session['id'],))
@@ -149,7 +162,10 @@ def farmer_dashboard():
         cursor.execute('SELECT SUM(total_price) as total FROM orders WHERE farmer_id = %s', (session['id'],))
         result = cursor.fetchone()
         total_earnings = result['total'] if result and result['total'] else 0
+        
         cursor.close()
+        connection.close()
+        
         stats = {'earnings': total_earnings, 'weather': '28°C, Clear Sky', 'news': 'Govt announces subsidy for drip irrigation.'}
         return render_template('farmer_dashboard.html', username=session['username'], listings=my_listings, sales=recent_sales, stats=stats, notifications=notifications)
     return redirect(url_for('login'))
@@ -159,7 +175,6 @@ def farmer_dashboard():
 def sell_crop():
     if 'loggedin' in session and session['role'] == 'Farmer':
         if request.method == 'POST':
-            # Handle Image Upload
             # Handle Image Upload via Cloudinary
             image_filename = None
             if 'product_image' in request.files:
@@ -175,13 +190,16 @@ def sell_crop():
             unit = request.form.get('unit', 'kg')
             location = request.form.get('location', 'General')
 
-            cursor = mysql.connection.cursor()
+            connection = get_db_connection()
+            cursor = connection.cursor()
             cursor.execute('''INSERT INTO marketplace (farmer_id, item_name, category, price, stock, description, image_file, unit, location) 
                               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)''', 
                            (session['id'], request.form['item_name'], request.form['category'], request.form['price'], 
                             request.form['stock'], request.form.get('description'), image_filename, unit, location))
-            mysql.connection.commit()
+            connection.commit()
             cursor.close()
+            connection.close()
+            
             flash('Crop Listed Successfully!')
             return redirect(url_for('farmer_dashboard'))
         return render_template('sell_crop.html', username=session['username'])
@@ -194,11 +212,14 @@ def api_crop_suggestions():
     query = request.args.get('query', '')
     if not query: return jsonify([])
     
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     # Fetch distinct crop names that start with the query
     cursor.execute("SELECT DISTINCT item_name FROM marketplace WHERE item_name LIKE %s LIMIT 5", (f"{query}%",))
     suggestions = [row['item_name'] for row in cursor.fetchall()]
     cursor.close()
+    connection.close()
+    
     return jsonify(suggestions)
 
 
@@ -212,7 +233,8 @@ def api_market_analysis():
     
     if not item_name: return jsonify({'status': 'error'})
     
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     
     # 1. Base Query: NOW FILTERS BY UNIT ALSO
     query = "SELECT price, stock, location FROM marketplace WHERE item_name = %s AND unit = %s"
@@ -231,6 +253,7 @@ def api_market_analysis():
     locations = [row['location'] for row in cursor.fetchall()]
     
     cursor.close()
+    connection.close()
     
     if not listings:
         return jsonify({
@@ -265,15 +288,15 @@ def api_market_analysis():
 
 @app.route('/generate_qr/<int:item_id>')
 def generate_qr(item_id):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     cursor.execute('SELECT * FROM marketplace WHERE id = %s', (item_id,))
     item = cursor.fetchone()
     cursor.close()
+    connection.close()
     
     if not item: return "Item not found"
 
-   
-    
     # Create the link
     # request.url_root automatically gets the current domain (e.g., https://agri-setu.vercel.app/)
     qr_data = f"{request.url_root}farmer_profile/{item['farmer_id']}"
@@ -289,7 +312,6 @@ def generate_qr(item_id):
 
 @app.route('/consumer_dashboard')
 def consumer_dashboard():
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     search_query = request.args.get('search', '')
     sort_by = request.args.get('sort', 'newest')
     
@@ -310,9 +332,12 @@ def consumer_dashboard():
     elif sort_by == 'fruit': sql_query += " AND category = 'Fruit'"
     else: sql_query += " ORDER BY id DESC"
 
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     cursor.execute(sql_query, tuple(params))
     products = cursor.fetchall()
     cursor.close()
+    connection.close()
     
     username = session.get('username', 'Guest')
     is_guest = 'loggedin' not in session
@@ -320,7 +345,8 @@ def consumer_dashboard():
 
 @app.route('/product/<int:product_id>')
 def product_detail(product_id):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     
     # 1. Get Product Details with Farmer Info
     cursor.execute('''
@@ -331,10 +357,12 @@ def product_detail(product_id):
     ''', (product_id,))
     product = cursor.fetchone()
     
-    if not product: return "Product not found"
+    if not product: 
+        cursor.close()
+        connection.close()
+        return "Product not found"
 
     # 2. Get Reviews specific to this Product (via item_name matching or direct linking if structure allowed)
-    # Since we link reviews to ORDERS, we find orders of this item name from this farmer
     cursor.execute('''
         SELECT reviews.*, users.username as buyer_name 
         FROM reviews 
@@ -352,6 +380,7 @@ def product_detail(product_id):
         avg_rating = round(total / len(reviews), 1)
 
     cursor.close()
+    connection.close()
     
     username = session.get('username', 'Guest')
     is_guest = 'loggedin' not in session
@@ -362,7 +391,8 @@ def product_detail(product_id):
 
 @app.route('/farmer_profile/<int:farmer_id>')
 def farmer_profile(farmer_id):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     
     cursor.execute('SELECT id, username, email, phone, about_me FROM users WHERE id = %s', (farmer_id,))
     farmer = cursor.fetchone()
@@ -386,23 +416,27 @@ def farmer_profile(farmer_id):
     avg_rating = round(avg, 1) if avg else "New"
     
     cursor.close()
+    connection.close()
+    
     is_guest = 'loggedin' not in session
     return render_template('farmer_profile.html', farmer=farmer, listings=listings, reviews=reviews, rating=avg_rating, is_guest=is_guest)
 
 # --- CART & ORDER APIs ---
-# (Keep api_add_to_cart, api_update_cart, api_remove_from_cart, cart, checkout, rate_order, my_orders AS IS from previous version)
-# For brevity, assuming they are pasted here correctly.
-# START PASTE
+
 @app.route('/api/add_to_cart', methods=['POST'])
 def api_add_to_cart():
     if 'loggedin' not in session: return jsonify({'status': 'error', 'message': 'Please login'})
     data = request.get_json()
     item_id = data.get('item_id')
     if 'cart' not in session: session['cart'] = []
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     cursor.execute('SELECT * FROM marketplace WHERE id = %s', (item_id,))
     product = cursor.fetchone()
     cursor.close()
+    connection.close()
+    
     if product:
         cart = session['cart']
         found = False
@@ -428,10 +462,14 @@ def api_update_cart():
     data = request.get_json()
     item_id = data.get('item_id')
     action = data.get('action')
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     cursor.execute('SELECT stock FROM marketplace WHERE id = %s', (item_id,))
     db_item = cursor.fetchone()
     cursor.close()
+    connection.close()
+    
     real_stock = db_item['stock'] if db_item else 0
     cart = session['cart']
     for item in cart:
@@ -466,7 +504,9 @@ def checkout():
     cart = session['cart']
     buyer_id = session['id']
     buyer_name = session['username']
-    cursor = mysql.connection.cursor()
+    
+    connection = get_db_connection()
+    cursor = connection.cursor()
     try:
         for item in cart:
             cursor.execute("SELECT stock FROM marketplace WHERE id=%s", (item['id'],))
@@ -478,43 +518,56 @@ def checkout():
                 cursor.execute('INSERT INTO orders (buyer_id, farmer_id, item_name, quantity, total_price) VALUES (%s, %s, %s, %s, %s)', (buyer_id, item['farmer_id'], item['name'], item['qty'], total))
                 msg = f"New Order! {buyer_name} bought {item['qty']}kg of {item['name']}."
                 cursor.execute('INSERT INTO notifications (user_id, message) VALUES (%s, %s)', (item['farmer_id'], msg))
-        mysql.connection.commit()
+        connection.commit()
         session.pop('cart', None)
         return render_template('checkout_success.html')
     except Exception as e:
-        mysql.connection.rollback()
+        connection.rollback()
         return f"Error: {str(e)}"
-    finally: cursor.close()
+    finally: 
+        cursor.close()
+        connection.close()
 
 @app.route('/my_orders')
 def my_orders():
     if 'loggedin' not in session: return redirect(url_for('login'))
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     cursor.execute('SELECT orders.*, users.username as farmer_name, users.phone as farmer_phone FROM orders JOIN users ON orders.farmer_id = users.id WHERE buyer_id = %s ORDER BY order_date DESC', (session['id'],))
     orders = cursor.fetchall()
     cursor.execute('SELECT order_id FROM reviews WHERE buyer_id = %s', (session['id'],))
     rated = [i['order_id'] for i in cursor.fetchall()]
     cursor.close()
+    connection.close()
+    
     return render_template('my_orders.html', orders=orders, rated_orders=rated)
 
 @app.route('/rate_order', methods=['POST'])
 def rate_order():
     if 'loggedin' not in session: return redirect(url_for('login'))
-    cursor = mysql.connection.cursor()
+    
+    connection = get_db_connection()
+    cursor = connection.cursor()
     cursor.execute('INSERT INTO reviews (order_id, farmer_id, buyer_id, rating, review_text) VALUES (%s, %s, %s, %s, %s)', (request.form['order_id'], request.form['farmer_id'], session['id'], request.form['rating'], request.form['review_text']))
-    mysql.connection.commit()
+    connection.commit()
     cursor.close()
+    connection.close()
+    
     return redirect(url_for('my_orders'))
-# END PASTE
 
 # --- EXTRAS ---
 @app.route('/update_profile', methods=['POST'])
 def update_profile():
     if 'loggedin' not in session: return redirect(url_for('login'))
-    cursor = mysql.connection.cursor()
+    
+    connection = get_db_connection()
+    cursor = connection.cursor()
     cursor.execute('UPDATE users SET phone=%s, about_me=%s WHERE id=%s', (request.form['phone'], request.form['about_me'], session['id']))
-    mysql.connection.commit()
+    connection.commit()
     cursor.close()
+    connection.close()
+    
     return redirect(url_for('settings'))
 
 @app.route('/ask_ai', methods=['POST'])
@@ -533,7 +586,7 @@ def tool_weather(): return jsonify({'status': 'success', 'data': {'temp': 29, 'd
 @app.route('/settings')
 def settings(): return render_template('settings.html', username=session.get('username'))
 
-# Logic APIs for tools (Keep from previous)
+# Logic APIs for tools
 @app.route('/tool/soil_test', methods=['POST'])
 def tool_soil_test(): return jsonify({'ph': '7.0', 'advice': 'Good soil.'})
 @app.route('/tool/pest_check', methods=['POST'])
@@ -548,16 +601,11 @@ def api_chat():
     try:
         data = request.get_json()
         user_msg = data.get('message', '')
-        
-        # Capture the Page Context sent from JS
         page_context = data.get('page_context', 'General Dashboard')
 
         if not user_msg:
             return jsonify({'error': 'Message is required'}), 400
 
-        # --- SYSTEM PROMPT (Defined as a raw string to prevent syntax errors) ---
-        # We tell the AI to use specific tags. 
-        # Note: We use single brackets here for simplicity, the JS will handle it.
         system_instructions = """
         You are 'Agri-Buddy', an interactive visual guide for the Agri Setu app.
         You have a physical body on the screen. You can move to specific buttons to show the user where to click.
@@ -579,28 +627,19 @@ def api_chat():
         3. IF ON A TOOL PAGE (Soil/Pest):
            - Guide them to fill the form and click Calculate.
            - To go back -> {{POINT_BACK}}
-		If a user asks how to do something in the app, tell them which tool to use. If they ask a general farming question, answer it.
+        If a user asks how to do something in the app, tell them which tool to use. If they ask a general farming question, answer it.
         Keep your answers very simple, polite, and under 3-4 sentences.
 
         CRITICAL RULE: Always reply in the exact same language that the user used to ask the question. If they type in Hindi, reply in Hindi. If they type in Telugu, reply in Telugu.
-        
                """
         
-        # Combine instructions with user message
         full_prompt = f"{system_instructions}\nUser Question: {user_msg}"
-
-        # Debug Print
         print(f"Sending to AI: {user_msg}")
-
-        # Send to AI
         response = chat_session.send_message(full_prompt)
-        
         print(f"AI Repled: {response.text}")
-        
         return jsonify({'reply': response.text})
 
     except Exception as e:
-        # This prints the EXACT error to your black terminal window
         print(f"SERVER ERROR IN /api/chat: {e}") 
         return jsonify({'reply': "Sorry, I am having trouble connecting. Please check the terminal for errors."}), 500
     
@@ -612,10 +651,10 @@ def api_chat():
 def chat_inbox():
     if 'loggedin' not in session: return redirect(url_for('login'))
     user_id = session['id']
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
-    # Logic: Find everyone you have talked to (sent or received)
-    # FIX: Use GROUP BY instead of DISTINCT to satisfy MySQL 5.7+ strict mode
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
+    
     query = """
         SELECT u.id, u.username, u.role, MAX(m.created_at) as last_interaction
         FROM users u
@@ -627,9 +666,7 @@ def chat_inbox():
     cursor.execute(query, (user_id, user_id))
     conversations = cursor.fetchall()
     
-    # Get last message and unread count for each conversation
     for conv in conversations:
-        # Fetch last message text
         cursor.execute("""
             SELECT message, created_at FROM messages 
             WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
@@ -639,7 +676,6 @@ def chat_inbox():
         conv['last_message'] = last_msg['message'] if last_msg else "Start chatting..."
         conv['time'] = last_msg['created_at'] if last_msg else ""
         
-        # Fetch unread count
         cursor.execute("""
             SELECT COUNT(*) as count FROM messages 
             WHERE sender_id = %s AND receiver_id = %s AND is_read = 0
@@ -647,20 +683,21 @@ def chat_inbox():
         conv['unread'] = cursor.fetchone()['count']
 
     cursor.close()
+    connection.close()
+    
     return render_template('chat_inbox.html', conversations=conversations, username=session['username'])
 
 @app.route('/chat/<int:other_user_id>')
 def chat_room(other_user_id):
     if 'loggedin' not in session: return redirect(url_for('login'))
     user_id = session['id']
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     
-    # 1. Get the specific user we are talking to
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
+    
     cursor.execute('SELECT id, username, role FROM users WHERE id = %s', (other_user_id,))
     other_user = cursor.fetchone()
     
-    # 2. FETCH THE SIDEBAR LIST (Essential for the new UI)
-    # This gets the list of people you've chatted with
     query = """
         SELECT u.id, u.username, u.role, MAX(m.created_at) as last_interaction
         FROM users u
@@ -672,7 +709,6 @@ def chat_room(other_user_id):
     cursor.execute(query, (user_id, user_id))
     conversations = cursor.fetchall()
 
-    # Add last message preview for the sidebar
     for conv in conversations:
         cursor.execute("""
             SELECT message FROM messages 
@@ -683,41 +719,7 @@ def chat_room(other_user_id):
         conv['last_message'] = last_msg['message'] if last_msg else "..."
 
     cursor.close()
-    
-    # Pass 'conversations' to the template
-    return render_template('chat_room.html', other_user=other_user, conversations=conversations, username=session['username'])
-    if 'loggedin' not in session: return redirect(url_for('login'))
-    user_id = session['id']
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    
-    # 1. Get the specific user we are talking to
-    cursor.execute('SELECT id, username, role FROM users WHERE id = %s', (other_user_id,))
-    other_user = cursor.fetchone()
-    
-    # 2. Get the Sidebar List (Inbox) - NEW ADDITION
-    # Reusing the inbox logic to show the list on the left
-    query = """
-        SELECT u.id, u.username, u.role, MAX(m.created_at) as last_interaction
-        FROM users u
-        JOIN messages m ON (u.id = m.sender_id AND m.receiver_id = %s) 
-                        OR (u.id = m.receiver_id AND m.sender_id = %s)
-        GROUP BY u.id, u.username, u.role
-        ORDER BY last_interaction DESC
-    """
-    cursor.execute(query, (user_id, user_id))
-    conversations = cursor.fetchall()
-
-    # Add last message preview for the sidebar
-    for conv in conversations:
-        cursor.execute("""
-            SELECT message FROM messages 
-            WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s)
-            ORDER BY created_at DESC LIMIT 1
-        """, (user_id, conv['id'], conv['id'], user_id))
-        last_msg = cursor.fetchone()
-        conv['last_message'] = last_msg['message'] if last_msg else "..."
-
-    cursor.close()
+    connection.close()
     
     return render_template('chat_room.html', other_user=other_user, conversations=conversations, username=session['username'])
 
@@ -727,11 +729,11 @@ def api_get_messages(other_user_id):
     if 'loggedin' not in session: return jsonify([])
     my_id = session['id']
     
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    connection = get_db_connection(dict_cursor=True)
+    cursor = connection.cursor()
     
-    # Mark messages from this user as read immediately when fetched
     cursor.execute("UPDATE messages SET is_read = 1 WHERE sender_id = %s AND receiver_id = %s", (other_user_id, my_id))
-    mysql.connection.commit()
+    connection.commit()
     
     cursor.execute("""
         SELECT * FROM messages 
@@ -739,7 +741,9 @@ def api_get_messages(other_user_id):
         ORDER BY created_at ASC
     """, (my_id, other_user_id, other_user_id, my_id))
     messages = cursor.fetchall()
+    
     cursor.close()
+    connection.close()
     
     return jsonify(messages)
 
@@ -749,21 +753,20 @@ def api_send_message():
     if 'loggedin' not in session: return jsonify({'status': 'error'})
     data = request.get_json()
     
-    cursor = mysql.connection.cursor()
+    connection = get_db_connection()
+    cursor = connection.cursor()
     cursor.execute("""
         INSERT INTO messages (sender_id, receiver_id, message) 
         VALUES (%s, %s, %s)
     """, (session['id'], data['receiver_id'], data['message']))
-    mysql.connection.commit()
+    connection.commit()
+    
     cursor.close()
+    connection.close()
     
     return jsonify({'status': 'success'})
 
-
-
 if __name__ == '__main__':
-    # Print the IP to the terminal so you know where to look
     ip = get_ip_address()
     print(f" --- APP RUNNING ON: http://{ip}:5000 --- ")
-    
-    app.run(debug=True, host='0.0.0.0') 
+    app.run(debug=True, host='0.0.0.0')
