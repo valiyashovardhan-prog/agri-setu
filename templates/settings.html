@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings | Agri Setu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Responsive Grid for Settings */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Left takes 2/3, Right takes 1/3 */
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Input Field Styling */
+        .icon-input {
+            display: flex; 
+            align-items: center; 
+            background: #f9f9f9; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 12px; 
+            padding: 0 15px;
+            transition: 0.3s;
+        }
+        .icon-input:focus-within {
+            border-color: var(--earth-dark);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.1);
+        }
+        .icon-input i { color: var(--text-muted); margin-right: 10px; }
+        .icon-input input, .icon-input textarea {
+            width: 100%; padding: 15px 0; border: none; background: transparent; outline: none; font-size: 1rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .settings-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-cog"></i> Settings</div>
+        
+        <!-- Back Button Logic: SOLID WHITE STYLE -->
+        {% if session['role'] == 'Farmer' %}
+            <a href="{{ url_for('farmer_dashboard') }}" class="btn-secondary" style="background: white; color: var(--earth-dark); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+        {% else %}
+            <a href="{{ url_for('consumer_dashboard') }}" class="btn-secondary" style="background: white; color: var(--earth-dark); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <i class="fas fa-arrow-left"></i> Market
+            </a>
+        {% endif %}
+    </nav>
+
+    <div class="container" style="margin-top: 40px;">
+        
+        <h1 class="section-title" style="margin-top: 0; margin-bottom: 30px;">Account Controls</h1>
+
+        <div class="settings-grid">
+            
+            <!-- LEFT COLUMN: Profile Form -->
+            <div class="glass-panel">
+                <div style="border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 10px;">
+                    <h2 style="color: var(--earth-dark); margin: 0;">Public Profile</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">This information is visible to buyers.</p>
+                </div>
+
+                <form action="{{ url_for('update_profile') }}" method="POST">
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 8px;">Username</label>
+                        <div class="icon-input" style="background: #eee; cursor: not-allowed;">
+                            <i class="fas fa-user"></i>
+                            <input type="text" value="{{ username }}" disabled style="color: #666;">
+                        </div>
+                        <small style="color: #888;">Username cannot be changed.</small>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 8px;">Contact Number</label>
+                        <div class="icon-input">
+                            <i class="fas fa-phone-alt"></i>
+                            <input type="text" name="phone" placeholder="e.g. +91 98765 43210" required>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <label style="font-weight: 600; display: block; margin-bottom: 8px;">Bio / Farm Details</label>
+                        <div class="icon-input">
+                            <i class="fas fa-align-left" style="align-self: flex-start; margin-top: 15px;"></i>
+                            <textarea name="about_me" rows="4" placeholder="Share details about your farming methods..."></textarea>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right;">
+                        <button type="submit" class="btn-submit" style="width: auto; padding: 12px 30px;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- RIGHT COLUMN: Preferences & Actions -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <!-- Language Card -->
+                <div class="glass-panel" style="padding: 20px;">
+                    <h3 style="margin-top: 0; color: var(--earth-dark);"><i class="fas fa-globe"></i> Language</h3>
+                    <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Choose your preferred language.</p>
+                    <div style="background: #f0fdf4; padding: 10px; border-radius: 10px; border: 1px dashed var(--earth-dark);">
+                        <div id="google_translate_element"></div>
+                    </div>
+                </div>
+
+                <!-- Support Card -->
+                <div class="glass-panel" style="padding: 20px; background: #FFF8E1; border-bottom-color: var(--harvest-gold);">
+                    <h3 style="margin-top: 0; color: #F57F17;"><i class="fas fa-headset"></i> Need Help?</h3>
+                    <p style="font-size: 0.9rem; margin-bottom: 15px;">Call our Kisan Helpline.</p>
+                    <a href="tel:18001801551" style="color: #F57F17; font-weight: bold; text-decoration: none;">
+                        <i class="fas fa-phone"></i> 1800-180-1551
+                    </a>
+                </div>
+
+                <!-- Logout Card -->
+                <div class="glass-panel" style="padding: 20px; text-align: center;">
+                    <a href="{{ url_for('logout') }}" style="color: var(--danger); text-decoration: none; font-weight: bold; display: block; padding: 10px; border: 2px solid var(--danger); border-radius: 50px; transition: 0.2s;">
+                        <i class="fas fa-sign-out-alt"></i> Log Out
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- GOOGLE TRANSLATE SCRIPT -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({
+            pageLanguage: 'en', 
+            includedLanguages: 'en,hi,te,ta,mr,bn,kn', 
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+          }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

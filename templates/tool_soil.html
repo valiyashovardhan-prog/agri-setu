@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Digital Soil Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-flask"></i> Soil Lab</div>
+        <a href="{{ url_for('farmer_dashboard') }}" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i> Exit Tool
+        </a>
+    </nav>
+
+    <div class="container" style="margin-top: 50px; max-width: 800px;">
+        <div class="glass-panel">
+            <h2 class="section-title">Soil Analysis Input</h2>
+            <form id="soilForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="input-group">
+                        <label>Soil Color</label>
+                        <select id="color" style="width: 100%; padding: 15px;">
+                            <option value="Red">Red Soil</option>
+                            <option value="Black">Black Soil</option>
+                            <option value="Brown">Loamy Brown</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Texture Feel</label>
+                        <select id="texture" style="width: 100%; padding: 15px;">
+                            <option value="Clay">Sticky (High Clay)</option>
+                            <option value="Sand">Gritty (High Sand)</option>
+                            <option value="Loam">Smooth (Balanced)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group" style="margin-top: 20px;">
+                    <label>Crop History (Previous Season)</label>
+                    <input type="text" placeholder="e.g., Rice, Cotton" style="width: 100%; padding: 15px;">
+                </div>
+                <button type="button" onclick="analyzeSoil()" class="btn-submit" style="margin-top: 20px;">Run Analysis</button>
+            </form>
+        </div>
+
+        <div id="resultBox" class="glass-panel" style="margin-top: 30px; display: none; border-left: 5px solid #8d6e63;">
+            <h3><i class="fas fa-microscope"></i> Lab Report</h3>
+            <p><strong>Estimated pH:</strong> <span id="res-ph" style="font-size: 1.2rem; font-weight: bold;"></span></p>
+            
+            <div style="margin: 20px 0;">
+                <label>Nitrogen (N)</label>
+                <div style="background: #eee; height: 10px; border-radius: 5px;"><div id="bar-n" style="width: 0%; height: 100%; background: #ef4444; border-radius: 5px;"></div></div>
+                
+                <label>Phosphorus (P)</label>
+                <div style="background: #eee; height: 10px; border-radius: 5px;"><div id="bar-p" style="width: 0%; height: 100%; background: #f59e0b; border-radius: 5px;"></div></div>
+                
+                <label>Potassium (K)</label>
+                <div style="background: #eee; height: 10px; border-radius: 5px;"><div id="bar-k" style="width: 0%; height: 100%; background: #10b981; border-radius: 5px;"></div></div>
+            </div>
+            
+            <div style="background: #fff8e1; padding: 15px; border-radius: 10px;">
+                <strong>💡 Recommendation:</strong> <span id="res-advice"></span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function analyzeSoil() {
+            const color = document.getElementById('color').value;
+            let ph = "7.0"; let advice = ""; let n=50, p=50, k=50;
+
+            if (color === 'Red') { ph = "5.5 (Acidic)"; n=30; p=40; advice = "Soil is Acidic. Add Lime + 50kg Urea/acre."; }
+            else if (color === 'Black') { ph = "8.0 (Alkaline)"; n=70; p=60; advice = "Rich in nutrients. Add Gypsum for Cotton."; }
+            else { ph = "6.5 (Neutral)"; n=50; p=50; advice = "Balanced soil. Use standard NPK 4:2:1 ratio."; }
+
+            document.getElementById('res-ph').innerText = ph;
+            document.getElementById('res-advice').innerText = advice;
+            document.getElementById('bar-n').style.width = n + "%";
+            document.getElementById('bar-p').style.width = p + "%";
+            document.getElementById('bar-k').style.width = k + "%";
+            document.getElementById('resultBox').style.display = "block";
+        }
+    </script>
+
+    <!-- GOOGLE TRANSLATE SCRIPT -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({
+            pageLanguage: 'en', 
+            includedLanguages: 'en,hi,te,ta,mr,bn,kn', 
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+          }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+/Agri_Setu_Project
+│
+├── app.py                  (The Final Clean Version)
+├── database_setup.sql      (The SQL Script - See below)
+├── requirements.txt        (The Library List - See below)
+│
+├── static/
+│   ├── style.css           (The V2.0 Glassmorphism Design)
+│   └── script.js           (The JS for AJAX/Modals)
+│
+└── templates/
+    ├── login.html
+    ├── register.html
+    ├── settings.html
+    │
+    ├── farmer_dashboard.html
+    ├── farmer_profile.html
+    ├── sell_crop.html
+    │
+    ├── consumer_dashboard.html
+    ├── cart.html
+    ├── my_orders.html
+    ├── checkout_success.html
+    │
+    ├── tool_soil.html      <-- NEW
+    ├── tool_crop.html      <-- NEW
+    ├── tool_pest.html      <-- NEW
+    └── tool_water.html     <-- NEW 

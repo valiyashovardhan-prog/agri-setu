@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ farmer.username }} | Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+   <nav class="navbar">
+        <div class="logo"><i class="fas fa-leaf"></i> Agri Setu</div>
+        <div class="nav-menu">
+            {% if not is_guest %}
+                <a href="{{ url_for('consumer_dashboard') }}" class="btn-submit">Back to Market</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" style="font-weight: bold; margin-right: 15px; text-decoration: none; color: var(--primary-dark);">Login</a>
+                <a href="{{ url_for('register') }}" class="btn-submit" style="width: auto; padding: 8px 20px; text-decoration: none;">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 40px;">
+        <div class="glass-panel" style="display: flex; align-items: center; gap: 30px; margin-bottom: 40px;">
+            <img src="https://ui-avatars.com/api/?name={{ farmer.username }}&size=150&background=064e3b&color=fff" style="border-radius: 50%;">
+            <div style="flex: 1;">
+                <h1 style="margin-bottom: 10px;">{{ farmer.username }} <i class="fas fa-check-circle" style="color: var(--primary-main); font-size: 1.5rem;"></i></h1>
+                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                    <span style="background: #fef3c7; color: #d97706; padding: 5px 15px; border-radius: 20px; font-weight: bold;">
+                        <i class="fas fa-star"></i> {{ rating }} / 5.0
+                    </span>
+                    <span style="color: #666;"><i class="fas fa-map-marker-alt"></i> Verified Seller</span>
+                </div>
+                <p style="color: #555; margin-bottom: 20px;">{{ farmer.about_me or "This farmer has not added a bio yet." }}</p>
+                
+                <div style="display: flex; gap: 15px;">
+                    <!-- Chat Button -->
+<a href="{{ url_for('chat_room', other_user_id=farmer.id) }}" class="btn-submit" style="background: #064e3b;color: white; margin-left: 10px; text-decoration: none;">
+    <i class="fas fa-comments"></i> Chat Now
+</a>
+                    <a href="tel:{{ farmer.phone }}" class="btn-submit" style="width: auto; text-decoration: none; background: #064e3b;">
+                        <i class="fas fa-phone"></i> Call for Bulk Order
+                    </a>
+                    <a href="mailto:{{ farmer.email }}" class="btn-submit" style="width: auto; text-decoration: none; background: white; color: #064e3b; border: 2px solid #064e3b;">
+                        <i class="fas fa-envelope"></i> Email
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Current Harvest</h2>
+        <div class="market-grid">
+            {% for item in listings %}
+            <div class="product-card">
+                 <div class="p-details">
+                    <h3>{{ item.item_name }}</h3>
+                    <div class="p-price">₹{{ item.price }}</div>
+                    <p style="color: #666; font-size: 0.9rem;">Stock: {{ item.stock }}kg</p>
+                </div>
+            </div>
+            {% else %}
+            <p>No active listings.</p>
+            {% endfor %}
+        </div>
+
+        <h2 class="section-title" style="margin-top: 50px;">Customer Reviews</h2>
+        <div class="glass-panel">
+            {% for review in reviews %}
+           <!-- Inside the Review Loop -->
+{% for review in reviews %}
+<div style="border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px;">
+    <div style="display: flex; justify-content: space-between;">
+        <strong>{{ review.buyer_name }}</strong>
+        <div style="color: #d97706;">{% for i in range(review.rating) %}<i class="fas fa-star"></i>{% endfor %}</div>
+    </div>
+    <!-- NEW LINE: Shows which item was rated -->
+    <div style="font-size: 0.85rem; color: var(--primary-main); margin-top: 5px;">
+        <i class="fas fa-tag"></i> Rated for: <strong>{{ review.item_name }}</strong>
+    </div>
+    <p style="margin-top: 5px;">"{{ review.review_text }}"</p>
+</div>
+{% endfor %}
+            {% else %}
+            <p style="color: #888;">No reviews yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Agri Setu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Specific Styles for Classic Inputs */
+        .classic-input-group {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px; /* Bigger padding for size */
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+            margin-bottom: 20px;
+        }
+        .classic-input-group:focus-within {
+            border-color: var(--earth-dark);
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.1);
+        }
+        .classic-input-group input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-size: 1.1rem; /* Larger text */
+            color: #333;
+            margin-left: 15px;
+            background: transparent;
+        }
+        .classic-input-group i.icon {
+            font-size: 1.2rem;
+            color: #888;
+            width: 25px;
+            text-align: center;
+        }
+        .toggle-password {
+            cursor: pointer;
+            color: var(--earth-dark);
+            font-size: 1.1rem;
+            padding: 5px;
+        }
+        label {
+            font-weight: 700;
+            color: #444;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f4f7f6;">
+
+    <div class="container" style="width: 100%; max-width: 450px; padding: 20px;">
+        
+        <div style="text-align: center; margin-bottom: 40px;">
+            <i class="fas fa-leaf fa-3x" style="color: var(--earth-dark);"></i>
+            <h1 style="color: var(--earth-dark); margin: 10px 0 5px 0;">Agri Setu</h1>
+            <p style="color: #666;">Welcome back! Please login.</p>
+        </div>
+
+        <div class="glass-panel" style="padding: 40px 30px;">
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div style="background: #FFEBEE; color: #D32F2F; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 500;">
+                        <i class="fas fa-exclamation-circle"></i> {{ messages[0] }}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('login') }}" method="POST">
+                
+                <!-- Email Input -->
+                <div>
+                    <label>Email Address</label>
+                    <div class="classic-input-group">
+                        <i class="fas fa-envelope icon"></i>
+                        <input type="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                </div>
+
+                <!-- Password Input -->
+                <div>
+                    <label>Password</label>
+                    <div class="classic-input-group">
+                        <i class="fas fa-lock icon"></i>
+                        <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" style="width: 100%; padding: 18px; font-size: 1.1rem; margin-top: 10px;">
+                    Sign In <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <p style="text-align: center; margin-top: 30px; color: #666; font-size: 1rem;">
+                Don't have an account? <a href="{{ url_for('register') }}" style="color: var(--earth-dark); font-weight: bold; text-decoration: none;">Register Now</a>
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        function togglePassword(fieldId, icon) {
+            const input = document.getElementById(fieldId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+
+</body>
+</html>

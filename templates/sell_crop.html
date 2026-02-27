@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart List | Agri Setu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Layout Grid */
+        .sell-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Form Styling */
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 5px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .input-group input, 
+        .input-group select, 
+        .input-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+            background: #fff;
+            font-family: inherit;
+        }
+
+        .input-group input:focus, 
+        .input-group select:focus, 
+        .input-group textarea:focus {
+            border-color: var(--earth-dark);
+        }
+
+        /* Unit Toggle Switch */
+        .unit-toggle { 
+            display: flex; 
+            gap: 5px; 
+            background: #f5f5f5; 
+            padding: 5px; 
+            border-radius: 12px; 
+            border: 1px solid #e0e0e0;
+        }
+        .unit-option {
+            flex: 1; 
+            padding: 8px; 
+            text-align: center; 
+            cursor: pointer;
+            border-radius: 8px; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            color: #666; 
+            transition: 0.3s;
+        }
+        .unit-option.active { 
+            background: white; 
+            color: var(--earth-dark); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        .hidden-radio { display: none; }
+
+        /* Auto-Complete Dropdown */
+        .suggestions-box {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 1px solid #ddd;
+            width: 100%;
+            max-height: 150px;
+            overflow-y: auto;
+            border-radius: 0 0 12px 12px;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .suggestion-item { padding: 10px 15px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid #f5f5f5; }
+        .suggestion-item:hover { background: #f0fdf4; color: var(--earth-dark); font-weight: 600; }
+
+        /* Analysis Cards */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card {
+            background: #f9fafb; padding: 12px; border-radius: 12px;
+            text-align: center; border: 1px solid #eee; position: relative;
+        }
+        .stat-card h4 { margin: 0; color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .val { font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-top: 5px; }
+        .stat-card.highlight { background: #E8F5E9; border-color: var(--earth-dark); }
+        .stat-card.highlight .val { color: var(--earth-dark); }
+
+        /* File Upload */
+        .file-upload-box {
+            background: #f9f9f9;
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .sell-grid { grid-template-columns: 1fr; }
+            .input-row { grid-template-columns: 1fr; gap: 0; }
+            .analysis-panel { order: -1; margin-bottom: 20px; } 
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-leaf"></i> Agri Setu</div>
+        <a href="{{ url_for('farmer_dashboard') }}" class="btn-secondary" style="background: white; color: var(--earth-dark); border: none;">
+            <i class="fas fa-arrow-left"></i> Dashboard
+        </a>
+    </nav>
+
+    <div class="container" style="margin-top: 40px;">
+        
+        <div class="sell-grid">
+            
+            <!-- LEFT: Selling Form -->
+            <div class="glass-panel">
+                <h2 class="section-title" style="margin-top: 0;"><i class="fas fa-plus-circle"></i> Sell New Crop</h2>
+                
+                <form action="{{ url_for('sell_crop') }}" method="POST" enctype="multipart/form-data">
+                    
+                    <!-- 1. Smart Name Input -->
+                    <div class="input-group" id="POINT_NAME">
+                        <label>Crop Name</label>
+                        <input type="text" name="item_name" id="itemName" placeholder="Type crop name (e.g. Tomato)..." required autocomplete="off" onkeyup="fetchSuggestions()">
+                        <div id="suggestionBox" class="suggestions-box"></div>
+                    </div>
+
+                    <!-- 2. Location (For filtering) -->
+                    <div class="input-group">
+                        <label>Harvest Location (District/Area)</label>
+                        <input type="text" name="location" placeholder="e.g. Warangal, Karimnagar" required>
+                    </div>
+
+                    <!-- 3. Category & Unit (Side by Side) -->
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Category</label>
+                            <select name="category" required>
+                                <option value="Veg">Vegetables</option>
+                                <option value="Fruit">Fruits</option>
+                                <option value="Grain">Grains</option>
+                                <option value="Waste">Agri-Waste</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label>Selling Unit</label>
+                            <div class="unit-toggle">
+                                <label class="unit-option active" onclick="selectUnit(this)">
+                                    Kg <input type="radio" name="unit" value="kg" checked class="hidden-radio">
+                                </label>
+                                <label class="unit-option" onclick="selectUnit(this)">
+                                    Quintal <input type="radio" name="unit" value="quintal" class="hidden-radio">
+                                </label>
+                                <label class="unit-option" onclick="selectUnit(this)">
+                                    Dozen <input type="radio" name="unit" value="dozen" class="hidden-radio">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Price & Stock (Side by Side) -->
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label>Price (₹)</label>
+                            <input type="number" name="price" placeholder="0.00" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Quantity</label>
+                            <input type="number" name="stock" placeholder="Available Stock" required>
+                        </div>
+                    </div>
+
+                    <!-- 5. Image & Desc -->
+                    <div class="input-group">
+                        <label>Description</label>
+                        <textarea name="description" rows="3" placeholder="Describe quality..."></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Upload Photo</label>
+                        <div class="file-upload-box">
+                            <input type="file" name="product_image" accept="image/*" style="width: 100%; border: none;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" style="width: 100%; margin-top: 10px;">List to Market</button>
+                </form>
+            </div>
+
+            <!-- RIGHT: Live Analysis Dashboard -->
+            <div class="analysis-panel">
+                <div class="glass-panel" style="background: #2E3B4E; color: white;">
+                    <h3 style="color: #FFC107; margin-top: 0;"><i class="fas fa-chart-line"></i> Market Intelligence</h3>
+                    <p style="opacity: 0.8; font-size: 0.9rem;">Real-time data for: <strong id="analyzing-crop">...</strong></p>
+                    
+                    <!-- Filters -->
+                    <div style="margin: 15px 0;">
+                        <select id="areaFilter" onchange="fetchAnalysis()" style="width: 100%; padding: 8px; border-radius: 8px; background: rgba(217, 217, 217, 0.37); color: rgb(0, 0, 0); border: 1px solid rgba(255,255,255,0.2); outline: none;">
+                            <option value="All">All Locations</option>
+                        </select>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="stat-grid">
+                        <div class="stat-card">
+                            <h4>Avg Price</h4>
+                            <div class="val" id="avg-price">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Competitors</h4>
+                            <div class="val" id="comp-count">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Lowest</h4>
+                            <div class="val" style="color: green;" id="low-price">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Highest</h4>
+                            <div class="val" style="color: red;" id="high-price">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendation -->
+                    <div style="background: rgba(255, 193, 7, 0.1); border: 1px dashed #FFC107; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+                        <h4 style="color: #FFC107; margin: 0 0 5px 0;">💡 Recommended Price</h4>
+                        <div style="font-size: 1.5rem; font-weight: bold;">₹ <span id="rec-price">0</span></div>
+                        <small style="opacity: 0.8;">Based on current competition</small>
+                    </div>
+
+                    <!-- Chart -->
+                    <div style="height: 200px; background: white; padding: 10px; border-radius: 12px;">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+   <script>
+        // --- 1. UNIT SELECTION UI ---
+        function selectUnit(element) {
+            // Remove active class from all options
+            document.querySelectorAll('.unit-option').forEach(el => el.classList.remove('active'));
+            // Add active class to the clicked option
+            element.classList.add('active');
+            // Check the hidden radio button inside
+            element.querySelector('input').checked = true;
+            
+            // TRIGGER LIVE UPDATE immediately when unit changes
+            fetchAnalysis(); 
+        }
+
+        // --- 2. AUTO COMPLETE LOGIC ---
+        function fetchSuggestions() {
+            let input = document.getElementById('itemName').value;
+            let box = document.getElementById('suggestionBox');
+            
+            if (input.length < 2) {
+                box.style.display = 'none';
+                return;
+            }
+
+            fetch('/api/crop_suggestions?query=' + input)
+            .then(res => res.json())
+            .then(data => {
+                box.innerHTML = '';
+                if (data.length > 0) {
+                    box.style.display = 'block';
+                    data.forEach(item => {
+                        let div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.innerText = item;
+                        div.onclick = function() {
+                            document.getElementById('itemName').value = item;
+                            box.style.display = 'none';
+                            fetchAnalysis(); // Trigger analysis immediately after selection
+                        };
+                        box.appendChild(div);
+                    });
+                } else {
+                    box.style.display = 'none';
+                }
+            });
+        }
+
+        // --- 3. LIVE MARKET ANALYSIS ---
+        let priceChart = null;
+
+        function fetchAnalysis() {
+            let crop = document.getElementById('itemName').value;
+            let location = document.getElementById('areaFilter').value;
+            
+            // GET SELECTED UNIT dynamically
+            let unitElement = document.querySelector('input[name="unit"]:checked');
+            let unit = unitElement ? unitElement.value : 'kg';
+            
+            if(!crop) return;
+            
+            // Update the display text
+            document.getElementById('analyzing-crop').innerText = crop + " (" + unit + ")";
+
+            // SEND UNIT TO SERVER
+            fetch(`/api/market_analysis?item_name=${crop}&location=${location}&unit=${unit}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    // Update Stats
+                    document.getElementById('avg-price').innerText = '₹' + data.avg;
+                    document.getElementById('comp-count').innerText = data.competitors;
+                    document.getElementById('low-price').innerText = '₹' + data.min;
+                    document.getElementById('high-price').innerText = '₹' + data.max;
+                    document.getElementById('rec-price').innerText = data.recommended;
+
+                    // Update Location Dropdown intelligently
+                    let locSelect = document.getElementById('areaFilter');
+                    if (locSelect.options.length === 1 && data.locations.length > 0) {
+                        data.locations.forEach(loc => {
+                            let opt = document.createElement('option');
+                            opt.value = loc;
+                            opt.innerText = loc;
+                            locSelect.appendChild(opt);
+                        });
+                    }
+
+                    // Update Chart
+                    updateChart(data.graph_data);
+                } else {
+                    // Reset if no data for THIS unit
+                    document.getElementById('avg-price').innerText = '-';
+                    document.getElementById('comp-count').innerText = '0';
+                    document.getElementById('low-price').innerText = '-';
+                    document.getElementById('high-price').innerText = '-';
+                    document.getElementById('rec-price').innerText = '0';
+                    
+                    // Clear chart if no data
+                    if (priceChart) priceChart.destroy();
+                }
+            });
+        }
+
+        function updateChart(prices) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            // Generate labels (Seller 1, Seller 2...)
+            const labels = prices.map((_, i) => `Seller ${i+1}`);
+
+            if (priceChart) priceChart.destroy();
+
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Market Prices',
+                        data: prices,
+                        borderColor: '#FFC107',
+                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+    </script>
+
+    <!-- Google Translate (Background) -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,hi,te,ta,mr,bn,kn', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

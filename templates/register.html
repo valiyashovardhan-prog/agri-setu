@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Agri Setu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- VIDEO BACKGROUND STYLES --- */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures video covers entire screen without stretching */
+            z-index: -1; /* Puts it behind everything */
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.259); /* Darkens video by 50% for readability */
+            z-index: 0;
+        }
+
+        /* Centered Container */
+        .register-container {
+            position: relative;
+            z-index: 1; /* Puts form on top of video/overlay */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* --- YOUR EXISTING STYLES (Kept intact) --- */
+        .classic-input-group {
+            background: rgba(192, 192, 192, 0.497);
+            border: 1px solid #4949498e;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+            margin-bottom: 20px;
+        }
+        .classic-input-group:focus-within {
+            border-color: var(--earth-dark);
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.1);
+        }
+        .classic-input-group input {
+            border: none; outline: none; width: 100%; font-size: 1.1rem; color: #000000; margin-left: 15px; background: transparent;
+        }
+        .classic-input-group i.icon { font-size: 1.2rem; color: #000000; width: 25px; text-align: center; }
+        .toggle-password { cursor: pointer; color: var(--earth-dark); font-size: 1.1rem; padding: 5px; }
+        label { font-weight: 700; color: #000000; margin-bottom: 8px; display: block; font-size: 0.95rem; }
+
+        .role-selector { display: flex; gap: 15px; margin-bottom: 25px; }
+        .role-option { flex: 1; cursor: pointer; position: relative; }
+        .role-option input { position: absolute; opacity: 0; cursor: pointer; }
+        
+        .role-card {
+            border: 2px solid #dddddd; border-radius: 15px; padding: 20px; text-align: center;
+            transition: 0.3s; background: rgba(188, 215, 165, 0.466); height: 100%;
+        }
+        
+        .role-option input:checked + .role-card {
+            border-color: var(--earth-dark);
+            background: #E8F5E9;
+            color: var(--earth-dark);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .role-card i { font-size: 2.5rem; margin-bottom: 10px; display: block; color: #000000; transition: 0.3s; }
+        .role-option input:checked + .role-card i { color: var(--earth-dark); }
+        .role-card strong { display: block; font-size: 1.1rem; }
+        .btn-submit {
+            background: rgb(0, 98, 0);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. THE VIDEO -->
+    <video autoplay muted loop playsinline class="video-bg">
+        <source src="{{ url_for('static', filename='video.mp4') }}" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+
+    <!-- 2. THE DARK OVERLAY -->
+    <div class="video-overlay"></div>
+
+    <!-- 3. THE FORM CONTENT -->
+    <div class="register-container">
+        <div style="width: 100%; max-width: 500px;">
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: white; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Create Account</h1>
+                <p style="color: #eee; font-size: 1.1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Join the Agri Setu community</p>
+            </div>
+
+            <div class="glass-panel" style="padding: 40px 30px; background: rgba(228, 228, 228, 0.351); backdrop-filter: blur(10px);">
+                
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div style="background: #FFF3E0; color: #E65100; padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                            {{ messages[0] }}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('register') }}" method="POST">
+                    
+                    <label>I am a:</label>
+                    <div class="role-selector">
+                        <label class="role-option">
+                            <input type="radio" name="role" value="Farmer" required>
+                            <div class="role-card">
+                                <i class="fas fa-tractor"></i> 
+                                <strong>Farmer</strong>
+                            </div>
+                        </label>
+                        <label class="role-option">
+                            <input type="radio" name="role" value="Consumer" required>
+                            <div class="role-card">
+                                <i class="fas fa-shopping-basket"></i>
+                                <strong>Consumer</strong>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label>Username</label>
+                        <div class="classic-input-group">
+                            <i class="fas fa-user icon"></i>
+                            <input type="text" name="username" placeholder="Choose a username" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Email</label>
+                        <div class="classic-input-group">
+                            <i class="fas fa-envelope icon"></i>
+                            <input type="email" name="email" placeholder="Enter email address" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Password</label>
+                        <div class="classic-input-group">
+                            <i class="fas fa-lock icon"></i>
+                            <input type="password" name="password" id="reg-password" placeholder="Create a password" required>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('reg-password', this)"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" style="width: 100%; padding: 18px; font-size: 1.1rem; margin-top: 10px;">
+                        Create Account
+                    </button>
+                </form>
+
+                <p style="text-align: center; margin-top: 30px; color: #000000; font-size: 1rem;">
+                    Already a member? <a href="{{ url_for('login') }}" style="color: var(--earth-dark); font-weight: bold; text-decoration: none;">Login Here</a>
+                </p>
+            </div> 
+        </div>
+    </div>
+
+    <!-- Password Toggle Script -->
+    <script>
+        function togglePassword(fieldId, icon) {
+            const input = document.getElementById(fieldId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+
+</body>
+</html>

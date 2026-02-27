@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Pest Doctor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-bug"></i> Pest Doctor</div>
+        <a href="{{ url_for('farmer_dashboard') }}" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i> Exit Tool
+        </a>
+    </nav>
+
+    <div class="container" style="margin-top: 50px; max-width: 800px;">
+        <div class="glass-panel">
+            <h2 class="section-title">Symptom Checker</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <label style="background:#f3f4f6; padding:10px 20px; border-radius:30px; cursor:pointer;"><input type="checkbox" id="sym1"> Holes in Leaves</label>
+                <label style="background:#f3f4f6; padding:10px 20px; border-radius:30px; cursor:pointer;"><input type="checkbox" id="sym2"> Yellow Spots</label>
+                <label style="background:#f3f4f6; padding:10px 20px; border-radius:30px; cursor:pointer;"><input type="checkbox" id="sym3"> White Powder</label>
+                <label style="background:#f3f4f6; padding:10px 20px; border-radius:30px; cursor:pointer;"><input type="checkbox" id="sym4"> Drooping Plant</label>
+            </div>
+            <button onclick="diagnose()" class="btn-submit" style="margin-top: 20px; background: #ef4444;">Diagnose Issue</button>
+        </div>
+
+        <div id="resultBox" class="glass-panel" style="margin-top: 30px; display: none;">
+            <h2 style="color: #ef4444;">Diagnosis: <span id="diag-name"></span></h2>
+            
+            <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="background: #ecfdf5; padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #065f46;">🍃 Organic Remedy</h4>
+                    <p id="rem-org"></p>
+                </div>
+                <div style="background: #fef2f2; padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #991b1b;">🧪 Chemical Remedy</h4>
+                    <p id="rem-chem"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function diagnose() {
+            let name="Unknown", org="Neem Oil Spray", chem="Consult Expert";
+            
+            if (document.getElementById('sym1').checked) { name="Stem Borer"; org="Neem Oil (3%)"; chem="Cartap Hydrochloride"; }
+            else if (document.getElementById('sym3').checked) { name="Powdery Mildew"; org="Milk + Water Spray"; chem="Sulphur Fungicide"; }
+            else if (document.getElementById('sym4').checked) { name="Root Rot"; org="Trichoderma Bio-agent"; chem="Copper Oxychloride"; }
+            
+            document.getElementById('diag-name').innerText = name;
+            document.getElementById('rem-org').innerText = org;
+            document.getElementById('rem-chem').innerText = chem;
+            document.getElementById('resultBox').style.display = "block";
+        }
+    </script>
+
+    <!-- GOOGLE TRANSLATE SCRIPT -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({
+            pageLanguage: 'en', 
+            includedLanguages: 'en,hi,te,ta,mr,bn,kn', 
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+          }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

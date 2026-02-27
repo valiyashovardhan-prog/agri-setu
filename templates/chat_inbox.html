@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages | Agri Setu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-comments"></i> Messages</div>
+        <a href="javascript:history.back()" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+    </nav>
+
+    <div class="container" style="margin-top: 20px; max-width: 600px;">
+        <h2 class="section-title">Your Conversations</h2>
+        
+        <div class="glass-panel" style="padding: 0;">
+            {% for chat in conversations %}
+            <a href="{{ url_for('chat_room', other_user_id=chat.id) }}" style="display: flex; padding: 15px; border-bottom: 1px solid #eee; align-items: center; text-decoration: none; color: inherit; transition: 0.2s;">
+                <img src="https://ui-avatars.com/api/?name={{ chat.username }}&background=random" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: bold; font-size: 1.1rem;">{{ chat.username }} <small style="font-weight: normal; color: #888;">({{ chat.role }})</small></div>
+                    <div style="color: #666; font-size: 0.9rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 250px;">
+                        {{ chat.last_message }}
+                    </div>
+                </div>
+                <div style="font-size: 0.8rem; color: #aaa;">&gt;</div>
+            </a>
+            {% else %}
+            <div style="padding: 40px; text-align: center; color: #888;">
+                <i class="far fa-paper-plane fa-3x"></i>
+                <p>No messages yet. Start a conversation from a profile!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

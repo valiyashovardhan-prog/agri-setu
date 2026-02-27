@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | Agri Setu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CLASSIC ORDER CARD STYLE */
+        .order-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+        .order-card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        /* 1. Header (Date & ID) */
+        .oc-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* 2. Body (Product Info) */
+        .oc-body {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .oc-icon {
+            width: 60px; height: 60px;
+            background: #f0fdf4;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: var(--earth-dark);
+            border: 1px solid #d1fae5;
+        }
+        .oc-details { flex: 1; }
+        .oc-title { font-size: 1.2rem; font-weight: 700; color: #333; margin: 0; }
+        .oc-meta { color: #777; font-size: 0.9rem; margin-top: 5px; }
+        .oc-price { font-size: 1.4rem; font-weight: 700; color: var(--earth-dark); }
+
+        /* 3. Footer (Actions) */
+        .oc-footer {
+            padding: 15px 20px;
+            border-top: 1px dashed #ddd; /* Receipt style dash */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+        }
+        .farmer-info { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; }
+        .farmer-avatar { width: 30px; height: 30px; border-radius: 50%; background: #eee; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .modal-content { background: white; margin: 15% auto; padding: 30px; width: 90%; max-width: 450px; border-radius: 15px; position: relative; animation: slideUp 0.3s; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        @keyframes slideUp { from {transform: translateY(20px); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .oc-body { flex-direction: column; align-items: flex-start; }
+            .oc-footer { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .oc-price { align-self: flex-end; margin-top: -30px; }
+            .btn-secondary { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-box"></i> Order History</div>
+        <a href="{{ url_for('consumer_dashboard') }}" class="btn-submit">
+            <i class="fas fa-arrow-left"></i> Market
+        </a>
+    </nav>
+
+    <div class="container" style="margin-top: 40px; max-width: 800px;">
+        
+        <h2 class="section-title" style="margin-bottom: 25px;">Past Orders</h2>
+
+        {% for order in orders %}
+        <div class="order-card">
+            <!-- Header -->
+            <div class="oc-header">
+                <span><i class="far fa-calendar-alt"></i> {{ order.order_date }}</span>
+                <span>ID: #{{ order.id }}</span>
+            </div>
+
+            <!-- Body -->
+            <div class="oc-body">
+                <div class="oc-icon">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <div class="oc-details">
+                    <h3 class="oc-title">{{ order.item_name }}</h3>
+                    <p class="oc-meta">Quantity: <strong>{{ order.quantity }} kg</strong></p>
+                </div>
+                <div class="oc-price">₹{{ order.total_price }}</div>
+            </div>
+
+            <!-- Footer -->
+            <div class="oc-footer">
+                <div class="farmer-info">
+                    <img src="https://ui-avatars.com/api/?name={{ order.farmer_name }}&background=random" class="farmer-avatar">
+                    <div>
+                        <div>Sold by <a href="{{ url_for('farmer_profile', farmer_id=order.farmer_id) }}" style="color: var(--earth-dark); text-decoration: none;">{{ order.farmer_name }}</a></div>
+                        {% if order.farmer_phone %}
+                        <a href="{{ url_for('chat_room', other_user_id=order.farmer_id) }}" style="color: var(--earth-dark); font-weight: bold; font-size: 1rem; text-decoration: none;">
+    <i class="fas fa-comment"></i> Chat
+</a>
+                        <div style="font-size: 0.8rem; color: #888;"><i class="fas fa-phone"></i> {{ order.farmer_phone }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    {% if order.id in rated_orders %}
+                        <button class="btn-secondary" style="background: #f3f4f6; color: #888; border-color: #ddd; cursor: default;">
+                            <i class="fas fa-star"></i> Rated
+                        </button>
+                    {% else %}
+                        <button onclick="openRateModal('{{ order.id }}', '{{ order.farmer_id }}')" class="btn-submit" style="padding: 8px 20px; font-size: 0.9rem;">
+                            Rate Product
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <div style="text-align: center; padding: 60px; background: white; border-radius: 20px;">
+                <i class="fas fa-shopping-basket fa-4x" style="color: #ddd; margin-bottom: 20px;"></i>
+                <h3 style="color: #666;">No orders yet</h3>
+                <p style="color: #999;">Your purchase history will appear here.</p>
+                <a href="{{ url_for('consumer_dashboard') }}" class="btn-submit" style="margin-top: 20px;">Start Shopping</a>
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- RATE MODAL -->
+    <div id="rateModal" class="modal">
+        <div class="modal-content">
+            <span onclick="document.getElementById('rateModal').style.display='none'" class="close">&times;</span>
+            <h2 style="color: var(--earth-dark); margin-top: 0;">Rate Quality</h2>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 20px;">Help others by rating the produce quality.</p>
+            
+            <form action="{{ url_for('rate_order') }}" method="POST">
+                <input type="hidden" id="modal_order_id" name="order_id">
+                <input type="hidden" id="modal_farmer_id" name="farmer_id">
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="font-weight: 600; display: block; margin-bottom: 5px;">Stars</label>
+                    <select name="rating" style="width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 1rem;">
+                        <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                        <option value="4">⭐⭐⭐⭐ Good</option>
+                        <option value="3">⭐⭐⭐ Average</option>
+                        <option value="2">⭐⭐ Poor</option>
+                        <option value="1">⭐ Bad</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: 600; display: block; margin-bottom: 5px;">Review</label>
+                    <textarea name="review_text" rows="3" placeholder="Freshness, packaging, etc..." style="width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-family: inherit;"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit" style="width: 100%;">Submit Feedback</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openRateModal(orderId, farmerId) {
+            document.getElementById('modal_order_id').value = orderId;
+            document.getElementById('modal_farmer_id').value = farmerId;
+            document.getElementById('rateModal').style.display = 'block';
+        }
+    </script>
+
+    <!-- GOOGLE TRANSLATE -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,hi,te,ta,mr,bn,kn', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+</html>

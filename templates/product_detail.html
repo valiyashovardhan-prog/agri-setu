@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ product.item_name }} | Agri Setu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-arrow-left" onclick="history.back()" style="cursor:pointer;"></i> Back</div>
+        <div class="nav-menu">
+            {% if not is_guest %}
+                <a href="{{ url_for('cart') }}" style="color: white; font-weight: bold;"><i class="fas fa-shopping-cart"></i> Cart</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" style="color: white;">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container" style="margin-top: 40px;">
+        <div class="glass-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">
+            
+            <!-- Left: Image -->
+            <div style="background: #f9f9f9; border-radius: 20px; overflow: hidden; display: flex; align-items: center; justify-content: center; height: 400px;">
+                {% if product.image_file %}
+                    <img src="{{ product.image_file }}" style="max-width: 100%; max-height: 100%; object-fit: cover;">
+                {% else %}
+                    <!-- Fallback Icon -->
+                    {% if product.category == 'Veg' %}<i class="fas fa-carrot fa-9x" style="color: var(--primary-dark);"></i>
+                    {% elif product.category == 'Fruit' %}<i class="fas fa-apple-alt fa-9x" style="color: #ef4444;"></i>
+                    {% else %}<i class="fas fa-wheat fa-9x" style="color: var(--harvest-gold);"></i>{% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Right: Details -->
+            <div>
+                <span class="filter-pill" style="margin-bottom: 10px; display: inline-block;">{{ product.category }}</span>
+                <h1 style="font-size: 2.5rem; margin-bottom: 10px; color: var(--text-main);">{{ product.item_name }}</h1>
+                
+                <div style="margin-bottom: 20px; color: #666;">
+                    <a href="{{ url_for('farmer_profile', farmer_id=product.farmer_id) }}" style="text-decoration: none; color: var(--primary-dark); font-weight: 600;">
+                        <i class="fas fa-user-circle"></i> Sold by {{ product.farmer_name }}
+                    </a>
+                    • <i class="fas fa-star" style="color: #f59e0b;"></i> {{ rating }} Rating
+                </div>
+
+                <div style="font-size: 2rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 20px;">
+                    ₹{{ product.price }} <span style="font-size: 1rem; color: #999; font-weight: 400;">/ kg</span>
+                </div>
+
+                <p style="margin-bottom: 30px; line-height: 1.8;">{{ product.description or "No description provided by the farmer." }}</p>
+
+                <div style="padding: 20px; background: #f0fdf4; border-radius: 15px; margin-bottom: 30px;">
+                    <strong>In Stock:</strong> {{ product.stock }} kg available.
+                </div>
+
+                <button onclick="addToCart({{ product.id }})" class="btn-submit" style="width: 100%; padding: 18px; font-size: 1.2rem;">
+                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                </button>
+            </div>
+        </div>
+
+        <!-- REVIEWS SECTION -->
+        <h2 class="section-title">Product Reviews</h2>
+        <div class="glass-panel">
+            {% for review in reviews %}
+            <div style="border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <strong>{{ review.buyer_name }}</strong>
+                    <div style="color: #f59e0b;">
+                        {% for i in range(review.rating) %}<i class="fas fa-star"></i>{% endfor %}
+                    </div>
+                </div>
+                <p style="margin-top: 10px; color: #555;">{{ review.review_text }}</p>
+                <small style="color: #999;">Posted on {{ review.created_at }}</small>
+            </div>
+            {% else %}
+                <p style="color: #888;">No reviews yet for this product.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">Added to Cart!</div>
+
+    <script>
+        function addToCart(itemId) {
+            fetch('/api/add_to_cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_id: itemId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    var x = document.getElementById("toast");
+                    x.className = "show";
+                    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+                } else if (data.message === 'Please login') {
+                    window.location.href = "{{ url_for('login') }}";
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

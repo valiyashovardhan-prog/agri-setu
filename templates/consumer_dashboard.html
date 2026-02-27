@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace | Agri Setu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+    <style>
+        .float {
+            position: absolute;
+            transition: transform 0.5s ease;
+            opacity: 0.5;
+            z-index: 0;
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .design-1 {
+            top: 120%;
+            width: 200px;
+        }
+        .design-2 {
+            
+            top: 58%;
+            right: 0;
+            width: 250px;
+        }
+        .design-3 {
+            top: 200%;
+            right: 0;
+            width: 150px;
+        }
+        .design-4 {
+            top: 11%;
+            left: 0;
+            width: 300px;
+            z-index: 1;
+        }   
+        /* Toast & Menu Styles */
+        #toast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 2px; padding: 16px; position: fixed; z-index: 1; left: 50%; bottom: 30px; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        
+        /* Dropdown Menu */
+        .profile-container { position: relative; cursor: pointer; }
+        .menu-box { display: none; position: absolute; top: 50px; right: 0; width: 200px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1000; border: 1px solid #eee; }
+        .menu-box a { display: block; padding: 12px; color: #333; text-decoration: none; border-bottom: 1px solid #f9f9f9; }
+        .menu-box a:hover { background: #f0fdf4; color: var(--primary-dark); }
+    </style>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='images/shape-1.png') }}" alt="" class="float design-1">
+    <img src="{{ url_for('static', filename='images/shape-2.png') }}" alt="" class="float design-2">
+    <img src="{{ url_for('static', filename='images/shape-4.png') }}" alt="" class="float design-3">
+    <img src="{{ url_for('static', filename='images/shape-5.png') }}" alt="" class="float design-4"> 
+
+    <nav class="navbar">
+        <div class="logo"><i class="fas fa-shopping-basket"></i> Agri Setu</div>
+        
+        <div class="nav-menu" style="display: flex; align-items: center; gap: 20px;">
+            
+            {% if not is_guest %}
+                <a href="{{ url_for('cart') }}" style="text-decoration: none; color: var(--text-main); font-weight: bold;">
+                    <i class="fas fa-shopping-cart"></i> Cart 
+                    <span id="cart-count" style="background: #ef4444; color: white; padding: 2px 6px; border-radius: 50%; font-size: 0.8rem;">0</span>
+                </a>
+                <!-- Add this near your other main buttons -->
+<a href="{{ url_for('chat_inbox') }}" class="btn-secondary" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 8px;">
+    <i class="fas fa-envelope"></i> My Messages
+</a>
+                
+                <div class="profile-container" onclick="document.getElementById('menuBox').style.display = (document.getElementById('menuBox').style.display === 'block') ? 'none' : 'block'">
+                    <div style="display: flex; align-items: center; gap: 8px; background: white; padding: 8px 15px; border-radius: 30px; border: 1px solid #eee;">
+                        <i class="fas fa-user-circle fa-lg" style="color: var(--primary-main);"></i>
+                        <span>{{ username }}</span>
+                        <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #888;"></i>
+                    </div>
+                    <div id="menuBox" class="menu-box">
+                        <a href="{{ url_for('my_orders') }}"><i class="fas fa-box"></i> My Orders</a>
+                        <a href="{{ url_for('logout') }}" style="color: red;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn-submit" style="width: auto; padding: 8px 20px; text-decoration: none; background: white; color: var(--primary-dark); border: 1px solid var(--primary-dark);">Login</a>
+                <a href="{{ url_for('register') }}" class="btn-submit" style="width: auto; padding: 8px 20px; text-decoration: none;">Register</a>
+            {% endif %}
+            
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <h1 style="font-size: 3rem;">Fresh. Local. Direct.</h1>
+        <p style="opacity: 0.9; font-size: 1.1rem; max-width: 600px; margin: 0 auto 30px auto;">
+            Connect directly with farmers. No middlemen, just fresh harvest.
+        </p>
+
+        <!-- SEARCH FORM -->
+        <form action="{{ url_for('consumer_dashboard') }}" method="GET" style="max-width: 700px; margin: 0 auto; position: relative;">
+            <div style="background: white; padding: 8px; border-radius: 50px; display: flex; align-items: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+                <i class="fas fa-search" style="color: #626262;text-shadow: 1px 1px 1px rgb(70, 70, 70); margin-left: 20px; font-size: 1.2rem;z-index: 2;"></i>
+                <!-- Added value attribute here to keep search text -->
+                <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search for rice, tomato, wheat..." 
+                       style="flex: 1; border: none; padding: 15px; font-size: 1rem; outline: none; font-family: 'Outfit'; z-index: 1;">
+                <button type="submit" class="btn-submit" style="border-radius: 40px; padding: 12px 30px; margin: 0;z-index: 2;">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="container" style="margin-top: 50px;">
+        
+        <div style="display: flex; gap: 15px; overflow-x: auto; padding-bottom: 20px; margin-bottom: 20px; justify-content: center;">
+            <a href="?sort=newest" class="filter-pill active">All</a>
+            <a href="?sort=veg" class="filter-pill">🥦 Vegetables</a>
+            <a href="?sort=fruit" class="filter-pill">🍎 Fruits</a>
+            <a href="?sort=price_low" class="filter-pill">💰 Low Price</a>
+        </div>
+
+        <div class="market-grid">
+            {% for item in products %}
+            <div class="product-card">
+                <a href="{{ url_for('product_detail', product_id=item.id) }}" style="text-decoration: none; color: inherit;">
+                    <div class="p-img-box">
+                        {% if item.image_file %}
+                            <img src="{{ item.image_file }}" style="width:100%; height:100%; object-fit:cover;">
+                        {% else %}
+                            <!-- Fallback Icons -->
+                            {% if item.category == 'Veg' %}<i class="fas fa-carrot fa-4x"></i>
+                            {% elif item.category == 'Fruit' %}<i class="fas fa-apple-alt fa-4x"></i>
+                            {% else %}<i class="fas fa-wheat fa-4x"></i>{% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="p-details">
+                        <div style="font-size: 0.8rem; text-transform: uppercase; color: #888; letter-spacing: 1px;">{{ item.category }}</div>
+                        <h3 style="margin: 5px 0;">{{ item.item_name }}</h3>
+                        
+                        <div style="font-size: 0.85rem; color: var(--primary-main); font-weight: bold; margin-bottom: 10px;">
+                            <i class="fas fa-user-tag"></i> Sold by: {{ item.farmer_name }}
+                        </div>
+
+                        <p style="font-size: 0.9rem; color: #666; line-height: 1.4; height: 40px; overflow: hidden;">{{ item.description }}</p>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                            <div class="p-price" style="font-size: 1.4rem;">₹{{ item.price }}</div>
+                            <!-- Add to Cart Button (Preventing Link Click) -->
+                            <object>
+                                <button onclick="event.preventDefault(); addToCart({{ item.id }})" class="btn-submit" style="width: auto; margin: 0; padding: 10px 20px; border-radius: 20px;z-index: 10;">
+                                    Add <i class="fas fa-plus"></i>
+                                </button>
+                            </object>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% else %}
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                <i class="fas fa-search fa-3x" style="color: #ddd;"></i>
+                <h3 style="color: #666; margin-top: 20px;">No products found for "{{ request.args.get('search', '') }}"</h3>
+                <a href="{{ url_for('consumer_dashboard') }}" class="btn-submit" style="width: auto; display: inline-block; margin-top: 15px;">View All Items</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="toast">Added to Cart!</div>
+
+    <!-- MOBILE BOTTOM NAV (Visible only on Phone) -->
+    <div class="mobile-nav">
+        <a href="{{ url_for('consumer_dashboard') }}" class="active"><i class="fas fa-store"></i> Market</a>
+        <a href="{{ url_for('cart') }}"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="{{ url_for('my_orders') }}"><i class="fas fa-box"></i> Orders</a>
+        <a href="{{ url_for('settings') }}"><i class="fas fa-user"></i> Profile</a>
+    </div>
+
+    <script>
+        function addToCart(itemId) {
+            fetch('/api/add_to_cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item_id: itemId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Check if cart-count element exists (desktop)
+                    const badge = document.getElementById('cart-count');
+                    if(badge) badge.innerText = data.cart_count;
+                    
+                    var x = document.getElementById("toast");
+                    x.className = "show";
+                    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+                } else if (data.message === 'Please login') {
+                    window.location.href = "{{ url_for('login') }}";
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

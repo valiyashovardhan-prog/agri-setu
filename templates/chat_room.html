@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chat | Agri Setu</title>
+    <!-- We keep style.css for fonts/colors but override layout below -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- CRITICAL LAYOUT RESETS --- */
+        html, body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0 !important; /* Override global padding */
+            overflow: hidden; /* Prevent body scroll */
+            background-color: #d1d7db;
+            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Hide global elements that might break layout */
+        .mobile-nav, .navbar, .chat-btn, .hero-section { 
+            display: none !important; 
+        }
+
+        /* --- APP CONTAINER --- */
+        .app-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR (Contact List) --- */
+        .sidebar {
+            width: 350px;
+            min-width: 300px;
+            height: 100%;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            height: 60px;
+            min-height: 60px;
+            background: #f0f2f5;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+        }
+
+        .sidebar-title { 
+            font-weight: 700; color: #444; font-size: 1.1rem; 
+            display: flex; align-items: center; gap: 10px; 
+        }
+
+        .contact-list {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .contact-item:hover { background: #f5f5f5; }
+        .contact-item.active { background: #f0f2f5; border-left: 4px solid var(--earth-dark); }
+
+        .contact-avatar {
+            width: 45px; height: 45px;
+            border-radius: 50%;
+            margin-right: 15px;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+
+        .contact-info { flex: 1; min-width: 0; }
+        .contact-name { font-weight: 600; font-size: 1rem; color: #111; margin-bottom: 3px; }
+        .contact-preview { 
+            font-size: 0.85rem; color: #666; 
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        }
+
+        /* --- CHAT WINDOW (Renamed to avoid conflict with style.css .chat-window) --- */
+        .room-window {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: #e5ddd5;
+            background-image: radial-gradient(#d4d4d4 1px, transparent 1px);
+            background-size: 20px 20px;
+            position: relative;
+        }
+
+        .room-header {
+            height: 60px;
+            min-height: 60px;
+            background: #f0f2f5;
+            border-bottom: 1px solid #d1d7db;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            gap: 15px;
+        }
+
+        .room-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 5%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .room-input-bar {
+            min-height: 60px;
+            background: #f0f2f5;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .room-input-bar input {
+            flex: 1;
+            padding: 12px 20px !important;
+            border-radius: 25px !important;
+            border: 1px solid white !important;
+            outline: none;
+            font-size: 1rem !important;
+            height: auto !important;
+            background: white !important;
+            margin: 0 !important;
+        }
+
+        .send-btn {
+            width: 45px !important; height: 45px !important;
+            border-radius: 50% !important;
+            background: var(--earth-dark);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 0 !important;
+            flex-shrink: 0;
+        }
+
+        /* MESSAGES */
+        .message-bubble {
+            max-width: 70%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            position: relative;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .msg-sent { align-self: flex-end; background: #d9fdd3; color: #111; border-top-right-radius: 0; }
+        .msg-received { align-self: flex-start; background: #ffffff; color: #111; border-top-left-radius: 0; }
+        .msg-time { font-size: 0.65rem; color: #999; float: right; margin-left: 10px; margin-top: 4px; }
+
+        /* --- MOBILE RESPONSIVE LOGIC --- */
+        .back-btn-mobile { display: none; }
+
+        @media (max-width: 768px) {
+            .sidebar { 
+                position: absolute; 
+                width: 100%; 
+                height: 100%; 
+                z-index: 50; /* Top layer */
+            }
+            /* When hidden, move it off-screen instead of display:none to allow transitions */
+            .sidebar.hidden { transform: translateX(-100%); }
+            
+            .room-window { width: 100%; }
+            .room-area { padding: 15px 10px; }
+            .message-bubble { max-width: 85%; }
+            
+            .back-btn-mobile { 
+                display: inline-flex; 
+                align-items: center; 
+                justify-content: center; 
+                margin-right: 10px; 
+                color: #555; 
+                cursor: pointer;
+                width: 30px; height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-layout">
+        
+        <!-- SIDEBAR (Contact List) -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <a href="{{ url_for('home') }}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                        <i class="fas fa-arrow-left"></i> Home
+                    </a>
+                </div>
+                <div style="font-weight: bold; color: #333;">Messages</div>
+            </div>
+            
+            <div class="contact-list">
+                {% if conversations is defined and conversations %}
+                    {% for chat in conversations %}
+                    <a href="{{ url_for('chat_room', other_user_id=chat.id) }}" class="contact-item {% if chat.id == other_user.id %}active{% endif %}">
+                        <img src="https://ui-avatars.com/api/?name={{ chat.username }}&background=random" class="contact-avatar">
+                        <div class="contact-info">
+                            <div class="contact-name">{{ chat.username }}</div>
+                            <div class="contact-preview">{{ chat.last_message }}</div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div style="padding: 30px; text-align: center; color: #999;">
+                        <p>No conversations yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- MAIN CHAT WINDOW -->
+        <div class="room-window">
+            
+            <!-- Chat Header -->
+            <div class="room-header">
+                <!-- Mobile Back Button -->
+                <div class="back-btn-mobile" onclick="showSidebar()">
+                    <i class="fas fa-arrow-left fa-lg"></i>
+                </div>
+                
+                <img src="https://ui-avatars.com/api/?name={{ other_user.username }}&background=fff&color=000" class="contact-avatar">
+                
+                <div class="contact-info">
+                    <div class="contact-name">{{ other_user.username }}</div>
+                    <div style="font-size: 0.8rem; color: #666;">{{ other_user.role }}</div>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div class="room-area" id="chatContainer">
+                <div style="text-align: center; color: #888; margin-top: 20px;">
+                    <i class="fas fa-spinner fa-spin"></i> Syncing...
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="room-input-bar">
+                <input type="text" id="msgInput" placeholder="Type a message..." autocomplete="off">
+                <button class="send-btn" onclick="sendMsg()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const receiverId = {{ other_user.id }};
+        const sidebar = document.getElementById('sidebar');
+        
+        // --- MOBILE LAYOUT LOGIC ---
+        function showSidebar() {
+            sidebar.classList.remove('hidden');
+        }
+
+        // On mobile, if we are in a chat room, hide the sidebar initially
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('hidden');
+        }
+
+        // --- MESSAGING LOGIC ---
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function loadMessages() {
+            fetch('/api/get_messages/' + receiverId)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('chatContainer');
+                let html = '';
+                
+                if (data.length === 0) {
+                    html = '<div style="text-align: center; color: #888; margin-top: 50px; background: rgba(255,255,255,0.6); padding: 10px; border-radius: 10px; display: inline-block; align-self: center;">Start conversation with ' + '{{ other_user.username }}' + '</div>';
+                } else {
+                    data.forEach(msg => {
+                        const isMe = (msg.sender_id != receiverId); 
+                        const bubbleClass = isMe ? 'msg-sent' : 'msg-received';
+                        const time = formatTime(msg.created_at);
+                        html += `<div class="message-bubble ${bubbleClass}">${msg.message}<span class="msg-time">${time}</span></div>`;
+                    });
+                }
+                
+                if (container.innerHTML !== html) {
+                    const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 150;
+                    container.innerHTML = html;
+                    if (isAtBottom || data.length < 5) container.scrollTop = container.scrollHeight;
+                }
+            });
+        }
+
+        function sendMsg() {
+            const input = document.getElementById('msgInput');
+            const txt = input.value.trim();
+            if(!txt) return;
+
+            const container = document.getElementById('chatContainer');
+            const tempDiv = document.createElement('div');
+            tempDiv.className = 'message-bubble msg-sent';
+            tempDiv.innerHTML = `${txt} <span class="msg-time"><i class="far fa-clock"></i></span>`;
+            container.appendChild(tempDiv);
+            container.scrollTop = container.scrollHeight;
+            input.value = ''; 
+
+            fetch('/api/send_message', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ receiver_id: receiverId, message: txt })
+            }).then(() => loadMessages());
+        }
+
+        document.getElementById("msgInput").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") sendMsg();
+        });
+
+        setInterval(loadMessages, 2000);
+        loadMessages();
+    </script>
+
+</body>
+</html>
