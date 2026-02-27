@@ -8,7 +8,6 @@ cloudinary==1.44.1
 colorama==0.4.6
 cryptography==46.0.5
 Flask==3.1.2
-Flask-MySQLdb==2.0.0
 google-ai-generativelanguage==0.6.15
 google-api-core==2.29.0
 google-api-python-client==2.190.0
@@ -24,7 +23,6 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 MarkupSafe==3.0.3
 mysql-connector-python==9.5.0
-mysqlclient==2.2.7
 numpy==2.4.1
 pillow==12.1.0
 proto-plus==1.27.1
@@ -35,6 +33,7 @@ pycparser==3.0
 pydantic==2.12.5
 pydantic_core==2.41.5
 pyparsing==3.3.2
+PyMySQL
 qrcode==8.2
 requests==2.32.5
 six==1.17.0
