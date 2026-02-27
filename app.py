@@ -46,7 +46,7 @@ def get_db_connection(dict_cursor=False):
     )
 
 # Setup Gemini AI 
-GEMINI_API_KEY = "AIzaSyDLfS83DwbcCyP3o0O_m6tkHN8I8BE0ebM"
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 genai.configure(api_key=GEMINI_API_KEY)
 
 # --- AUTO-DETECT WORKING MODEL ---
