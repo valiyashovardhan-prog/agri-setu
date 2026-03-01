@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Farmer Studio | Agri Setu</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    
     <style>
-        /* --- MENU BOX STYLES --- */
+        /* --- MENU BOX STYLES (Desktop) --- */
         .profile-container { position: relative; cursor: pointer; }
         
         .menu-box {
@@ -29,7 +28,7 @@
         .menu-links a:hover { background: #f9fafb; color: var(--primary-dark); padding-left: 25px; }
 
         /* --- MODAL STYLES --- */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+        .modal { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
         .modal-content { background-color: #fefefe; margin: 5% auto; padding: 30px; border-radius: 24px; width: 80%; max-width: 800px; position: relative; animation: fadeInUp 0.4s; }
         .close { float: right; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa; }
         .close:hover { color: black; }
@@ -41,57 +40,167 @@
         
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .glass-panel:hover .kit-layer {
-            transform: scale(1.2);
-            transition: transform 0.7s ease;
+        /* Hover Effects (Desktop) */
+        .glass-panel:hover .kit-layer { transform: scale(1.2); transition: transform 0.7s ease; }
+        .glass-panel:hover .fa-flask, 
+        .glass-panel:hover .fa-bug, 
+        .glass-panel:hover .fa-seedling, 
+        .glass-panel:hover .fa-tint { transition: transform 0.7s ease; transform: rotate(360deg) scale(1.1); }
 
+        /* ========================================================
+           CRITICAL DESKTOP/GLOBAL FIXES
+           ======================================================== */
+           
+        /* 1. Perfect Circles for Buttons */
+        .chat-btn, .mic-btn-huge {
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 !important;
+            flex-shrink: 0 !important;
+            aspect-ratio: 1 / 1 !important;
         }
+        .mic-btn-huge { width: 80px !important; height: 80px !important; margin: 0 auto !important; }
+        .chat-btn { width: 60px !important; height: 60px !important; }
 
-        .glass-panel:hover .fa-flask{
+        /* 2. Fix Mascot Overlapping Chat Send Button */
+        #chatWindow { z-index: 999999 !important; }
+
+        /* --- DEFAULT (DESKTOP) COLLAPSIBLE STYLES --- */
+        .collapsible-panel { display: block !important; }
+        .mobile-chevron { display: none !important; }
+
+        /* --- 🌟 PREMIUM MOBILE APP STYLES (Only affects screens < 768px) 🌟 --- */
+        .mobile-top-header { display: none; } /* Hidden on desktop */
+
+        @media (max-width: 768px) {
             
-            transition: transform 0.7s ease;
-            transform: rotate(360deg) scale(1.1);
+            /* =======================================
+               MOBILE-ONLY FIXES 
+               ======================================= */
+               
+            /* 1. Aggressively Disable Sticky Hover on Mobile */
+            .glass-panel:hover, .btn-submit:hover, .btn-secondary:hover, .chat-btn:hover, a:hover {
+                transform: none !important;
+            }
+            .glass-panel:hover .kit-layer, .glass-panel:hover .fa-flask, .glass-panel:hover .fa-bug, .glass-panel:hover .fa-seedling, .glass-panel:hover .fa-tint {
+                transform: none !important;
+            }
+            /* Prevent button color getting stuck */
+            .btn-submit:hover { background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%) !important; }
 
-        }
+            /* 2. Move Chat Icon to Bottom-Left to avoid Mascot */
+            .chat-btn { 
+                width: 55px !important; height: 55px !important; 
+                left: 20px !important; /* Forces it to the left */
+                right: auto !important;
+                bottom: 105px !important; /* Rests above mobile nav */
+            }
+            .mic-btn-huge { width: 70px !important; height: 70px !important; }
 
-        .glass-panel:hover .fa-bug{
+            /* 3. Mobile Shrinking Tables (Accordions) */
+            .collapsible-panel { display: none !important; } /* Hide tables by default */
+            .collapsible-panel.open { display: block !important; animation: fadeInDown 0.3s ease; }
+            .mobile-chevron { display: inline-block !important; }
             
-            transition: transform 0.7s ease;
-            transform: rotate(360deg) scale(1.1);
+            /* Style headers as tappable cards on mobile */
+            .mobile-toggle-header {
+                background: white;
+                padding: 18px 20px;
+                border-radius: 16px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+                cursor: pointer;
+                margin-top: 20px !important;
+                margin-bottom: 10px !important;
+                border: 1px solid #f5f5f5;
+            }
+            .mobile-toggle-header h2 {
+                border-left: none !important;
+                padding-left: 0 !important;
+                font-size: 1.15rem !important;
+            }
 
-        }
+            /* =======================================
+               EXISTING MOBILE UI STYLES
+               ======================================= */
+            .mobile-top-header {
+                display: flex !important; justify-content: space-between; align-items: center;
+                padding: 15px 20px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+                position: sticky; top: 0; z-index: 4000; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            }
 
-        .glass-panel:hover .fa-seedling{
-            
-            transition: transform 0.7s ease;
-            transform: rotate(360deg) scale(1.1);
+            .stats-grid {
+                display: flex !important; flex-wrap: nowrap !important; overflow-x: auto !important;
+                scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; 
+                padding-bottom: 20px !important; gap: 15px !important; margin-right: -15px; padding-right: 15px;
+            }
+            .stats-grid::-webkit-scrollbar { display: none; } 
+            .stats-grid { -ms-overflow-style: none; scrollbar-width: none; }
+            .stats-grid .glass-panel {
+                min-width: 85% !important; scroll-snap-align: center; margin-bottom: 0 !important;
+                border-radius: 24px !important; box-shadow: 0 8px 24px rgba(0,0,0,0.06) !important; border: 1px solid rgba(255,255,255,0.6) !important;
+            }
 
-        }
+            .btn-sell-massive {
+                border-radius: 28px !important; background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%) !important;
+                padding: 25px !important; box-shadow: 0 12px 30px rgba(255, 152, 0, 0.35) !important; border: 2px solid rgba(255, 255, 255, 0.5) !important;
+            }
 
-        .glass-panel:hover .fa-tint{
-            
-            transition: transform 0.7s ease;
-            transform: rotate(360deg) scale(1.1);
+            .mobile-nav {
+                background: rgba(255, 255, 255, 0.85) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important;
+                border-top: 1px solid rgba(0,0,0,0.05) !important; padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important; 
+                box-shadow: 0 -10px 30px rgba(0,0,0,0.05) !important;
+            }
 
+            .glass-panel table tr {
+                border-radius: 18px !important; box-shadow: 0 6px 16px rgba(0,0,0,0.04) !important;
+                border: 1px solid #f5f5f5 !important; margin-bottom: 15px !important; padding: 18px !important;
+            }
+
+            .modal-content { width: 95% !important; margin: 20% auto !important; border-radius: 28px !important; padding: 25px !important; }
+            .hero-section { border-radius: 0 0 35px 35px !important; padding: 30px 20px 40px 20px !important; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
+    <!-- MOBILE TOP HEADER -->
+    <div class="mobile-top-header">
+        <div class="logo" style="color: var(--primary-dark); font-weight: 800; font-size: 1.3rem;">
+            <i class="fas fa-leaf"></i> Agri Setu
+        </div>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <!-- Messages Icon -->
+            <a href="{{ url_for('chat_inbox') }}" style="color: var(--primary-dark); font-size: 1.3rem;">
+                <i class="fas fa-envelope"></i>
+            </a>
+            <!-- Notifications Icon -->
+            <a href="#" onclick="openModal('modal-notifications')" style="color: var(--primary-dark); font-size: 1.3rem; position: relative;">
+                <i class="fas fa-bell"></i>
+                {% if notifications|length > 0 %}
+                    <span style="position: absolute; top: -2px; right: -2px; background: #ef4444; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white;"></span>
+                {% endif %}
+            </a>
+            <!-- Profile Thumbnail -->
+            <img src="https://ui-avatars.com/api/?name={{ username }}&background=0D8ABC&color=fff" style="width: 36px; height: 36px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1);" onclick="window.location.href='{{ url_for('settings') }}'">
+        </div>
+    </div>
+
+    <!-- NAVBAR (Desktop) - ADDED 'hide-on-mobile' class -->
+    <nav class="navbar hide-on-mobile">
         <div class="logo"><i class="fas fa-leaf"></i> Agri Setu</div>
-        <!-- Add this near your other main buttons -->
-<a href="{{ url_for('chat_inbox') }}" class="btn-secondary" style="margin-top: 2px; display: inline-flex; align-items: center; margin-left: 63%;">
-    <i class="fas fa-envelope"></i> My Messages
-</a>
         
-        <div class="profile-container"id="target-profile"  onclick="toggleMenu()">
+        <a href="{{ url_for('chat_inbox') }}" class="btn-secondary" style="margin-top: 2px; display: inline-flex; align-items: center; margin-left: 63%;">
+            <i class="fas fa-envelope"></i> My Messages
+        </a>
+        
+        <div class="profile-container" id="target-profile" onclick="toggleMenu()">
             <div style="display: flex; align-items: center; gap: 10px; padding: 8px 15px; background: white; border-radius: 30px; border: 1px solid #eee;">
                 <img src="https://ui-avatars.com/api/?name={{ username }}&background=0D8ABC&color=fff" style="width: 35px; border-radius: 50%;">
                 <span style="font-weight: bold;">{{ username }}</span>
                 <i class="fas fa-chevron-down" style="font-size: 0.8rem; color: #888;"></i>
             </div>
-            
 
             <div id="menuBox" class="menu-box">
                 <div class="menu-header">
@@ -117,8 +226,8 @@
         </div>
     </nav>
 
+    <!-- HERO SECTION -->
     <header class="hero-section">
-        
         <div class="video-bg-container">
             <video id="player1" class="bg-video active" muted playsinline></video>
             <video id="player2" class="bg-video" muted playsinline></video>
@@ -135,53 +244,14 @@
                 <div id="resultMsg" style="color: #FFC107; font-weight: bold; margin-top: 5px;"></div>
             </div>
         </div>
-
     </header>
 
-    <script>
-        // 1. List your video files here
-        const playlist = [
-            "{{ url_for('static', filename='videos/v1.mp4') }}",
-            "{{ url_for('static', filename='videos/v2.mp4') }}",
-            "{{ url_for('static', filename='videos/v3.mp4') }}" 
-        ];
-
-        let currentIdx = 0;
-        const p1 = document.getElementById('player1');
-        const p2 = document.getElementById('player2');
-        
-        // Start the first video
-        p1.src = playlist[0];
-        p1.play();
-
-        // Function to swap videos when one ends
-        function nextVideo(activePlayer, hiddenPlayer) {
-            // Calculate next video index
-            currentIdx = (currentIdx + 1) % playlist.length;
-            
-            // Prepare the hidden player
-            hiddenPlayer.src = playlist[currentIdx];
-            hiddenPlayer.play();
-            
-            // FADE TRANSITION
-            hiddenPlayer.classList.add('active'); // Fade In
-            activePlayer.classList.remove('active'); // Fade Out
-            
-            // Reset the event listeners so they trigger the next swap correctly
-            hiddenPlayer.onended = function() { nextVideo(hiddenPlayer, activePlayer); };
-        }
-
-        // Trigger the cycle when the first video ends
-        p1.onended = function() { nextVideo(p1, p2); };
-    </script>
-
-
-
     <div class="container">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        <!-- TOP STATS -->
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
             <div id="target-weather" class="glass-panel" onclick="openModal('modal-weather')" style="cursor: pointer; position: relative;">
                 <h3 style="color: var(--primary-dark);"><i class="fas fa-cloud-sun"></i> Weather</h3>
-                <p style="font-size: 1.2rem; margin-top: 10px;">{{ stats.weather }}</p>
+                <p style="font-size: 1.2rem; margin-top: 10px; font-weight: 600;">{{ stats.weather }}</p>
                 <div style="position: absolute; bottom: 20px; right: 20px; color: var(--primary-main);"><i class="fas fa-arrow-right"></i></div>
             </div>
             <div id="target-finance" class="glass-panel" onclick="openModal('modal-finance')" style="cursor: pointer; position: relative;">
@@ -191,185 +261,200 @@
             </div>
             <div class="glass-panel" onclick="openModal('modal-news')" style="cursor: pointer; position: relative;">
                 <h3 style="color: var(--primary-dark);"><i class="fas fa-newspaper"></i> Updates</h3>
-                <p style="font-size: 0.9rem; margin-top: 10px; color: #666;">{{ stats.news }}</p>
+                <p style="font-size: 0.9rem; margin-top: 10px; color: #666; line-height: 1.4;">{{ stats.news }}</p>
                 <div style="position: absolute; bottom: 20px; right: 20px; color: var(--primary-main);"><i class="fas fa-external-link-alt"></i></div>
             </div>
         </div>
         
-        <!-- NEW: BIG VISUAL SELL BUTTON -->
-        <div  style="margin: 30px 0;">
-            <a href="{{ url_for('sell_crop') }}" id="target-sell" class="btn-submit" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; font-size: 1.2rem; box-shadow: 0 8px 20px rgba(25, 78, 0, 0.4); border-radius: 20px; text-decoration: none;">
+        <!-- BIG VISUAL SELL BUTTON -->
+        <div style="margin: 30px 0;">
+            <a href="{{ url_for('sell_crop') }}" id="target-sell" class="btn-submit btn-sell-massive" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; font-size: 1.2rem; box-shadow: 0 8px 20px rgba(25, 78, 0, 0.4); border-radius: 20px; text-decoration: none;">
                 <i class="fas fa-plus-circle" style="font-size: 2.5rem; margin-bottom: 10px; color: #3e2723;"></i>
-                <span style="color: #3e2723; font-weight: 700;">SELL YOUR CROP</span>
-                <span style="font-size: 0.9rem; color: #5d4037; font-weight: normal;">Click here to list items for sale</span>
+                <span style="color: #3e2723; font-weight: 700; letter-spacing: 0.5px;">SELL YOUR CROP</span>
+                <span style="font-size: 0.9rem; color: rgba(93, 64, 55, 0.8); font-weight: 500; margin-top: 5px;">Click here to list items for sale</span>
             </a>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 10px;">
-            <h2 class="section-title" style="margin: 0;"><i class="fas fa-boxes"></i> Active Stock</h2>
-            <a href="{{ url_for('sell_crop') }}" class="btn-submit" style="font-size: 0.8rem; padding: 8px 20px;">+ Sell New</a>
+        <!-- ==============================================
+             UPDATED: ACTIVE STOCK (Collapsible on Mobile)
+             ============================================== -->
+        <div class="mobile-toggle-header" onclick="toggleMobileSection('active-stock-panel', 'stock-chevron')" style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; margin-bottom: 15px;">
+            <h2 class="section-title" style="margin: 0; display: flex; align-items: center;">
+                <i class="fas fa-boxes" style="margin-right: 10px;"></i> Active Stock
+                <i class="fas fa-chevron-down mobile-chevron" id="stock-chevron" style="margin-left: 10px; color: #888; font-size: 1rem;"></i>
+            </h2>
+            <a href="{{ url_for('sell_crop') }}" class="btn-submit" style="font-size: 0.8rem; padding: 8px 20px; box-shadow: none;" onclick="event.stopPropagation();">+ Add New</a>
         </div>
 
-        <div class="glass-panel" style="padding: 0; background: white; box-shadow: none; border: none;">
-            <table style="width: 100%;">
-                <thead>
-                    <tr><th>Item</th><th>Price</th><th>Stock</th><th>Action</th></tr>
-                </thead>
-                <tbody>
-                    <!-- ACTIVE ITEMS LOOP -->
-                    {% for item in listings if item.stock > 0 %}
-                    <tr>
-                        <td data-label="Item">
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                {% if item.category == 'Veg' %}<i class="fas fa-carrot" style="color: orange;"></i>{% endif %}
-                                {% if item.category == 'Fruit' %}<i class="fas fa-apple-alt" style="color: red;"></i>{% endif %}
-                                {% if item.category == 'Grain' %}<i class="fas fa-wheat" style="color: gold;"></i>{% endif %}
-                                <strong>{{ item.item_name }}</strong>
-                            </div>
-                        </td>
-                        <td data-label="Price">₹{{ item.price }}</td>
-                        <td data-label="Stock" style="color: var(--earth-dark); font-weight: bold;">{{ item.stock }} kg</td>
-                        <td data-label="Action">
-                            <button onclick="openQR('{{ item.item_name }}', '{{ item.id }}')" class="btn-secondary" style="padding: 5px 10px; font-size: 0.8rem;">
-                                <i class="fas fa-qrcode"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% else %}
-                        <tr><td colspan="4" style="text-align: center; padding: 20px; color: #888;">No active stock.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        <div id="active-stock-panel" class="collapsible-panel">
+            <div class="glass-panel" style="padding: 0; background: white; box-shadow: none; border: none;">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr><th>Item</th><th>Price</th><th>Stock</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for item in listings if item.stock > 0 %}
+                        <tr>
+                            <td data-label="Item">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    {% if item.category == 'Veg' %}<i class="fas fa-carrot" style="color: orange; font-size: 1.2rem;"></i>{% endif %}
+                                    {% if item.category == 'Fruit' %}<i class="fas fa-apple-alt" style="color: red; font-size: 1.2rem;"></i>{% endif %}
+                                    {% if item.category == 'Grain' %}<i class="fas fa-wheat" style="color: gold; font-size: 1.2rem;"></i>{% endif %}
+                                    <strong style="font-size: 1.05rem;">{{ item.item_name }}</strong>
+                                </div>
+                            </td>
+                            <td data-label="Price" style="color: var(--text-muted);">₹{{ item.price }}</td>
+                            <td data-label="Stock" style="color: var(--earth-dark); font-weight: bold;">{{ item.stock }} kg</td>
+                            <td data-label="Action">
+                                <button onclick="openQR('{{ item.item_name }}', '{{ item.id }}')" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px;">
+                                    <i class="fas fa-qrcode"></i> QR
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                            <tr><td colspan="4" style="text-align: center; padding: 30px; color: #888;">No active stock currently.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
 
-        <!-- SOLD OUT HISTORY (Collapsible) -->
-        <div style="margin-top: 15px;">
-            <button onclick="toggleSoldHistory()" class="btn-secondary" style="width: 100%; justify-content: space-between; background: #f0f0f0; border: none; padding: 15px;">
-                <span><i class="fas fa-history"></i> View Sold Out / Archive</span>
-                <i class="fas fa-chevron-down" id="sold-icon"></i>
-            </button>
-            
-            <div id="sold-history-panel" style="display: none; margin-top: 10px; animation: fadeIn 0.3s ease;">
-                <div class="glass-panel" style="padding: 0; background: transparent; box-shadow: none; border: none; opacity: 0.8;">
-                    <table style="width: 100%;">
-                        <thead>
-                            <tr><th>Item</th><th>Price</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            <!-- SOLD ITEMS LOOP -->
-                            {% for item in listings if item.stock == 0 %}
-                            <tr style="background: #f9f9f9; border-color: #eee;">
-                                <td data-label="Item" style="color: #666;">
-                                    {{ item.item_name }}
-                                </td>
-                                <td data-label="Price" style="color: #888;">₹{{ item.price }}</td>
-                                <td data-label="Status">
-                                    <span style="background: #FFEBEE; color: #D32F2F; padding: 4px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: bold;">Sold Out</span>
-                                </td>
-                            </tr>
-                            {% else %}
-                                <tr><td colspan="3" style="text-align: center; padding: 15px; color: #888; font-size: 0.9rem;">No archived items.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            <!-- SOLD OUT HISTORY (Stays inside the Active Stock panel conceptually, or right below it) -->
+            <div style="margin-top: 15px;">
+                <button onclick="toggleSoldHistory()" class="btn-secondary" style="width: 100%; justify-content: space-between; background: #f8f9fa; border: 1px solid #eee; padding: 18px; border-radius: 16px;">
+                    <span style="font-weight: 600; color: #555;"><i class="fas fa-history" style="margin-right: 8px;"></i> View Sold Out Archive</span>
+                    <i class="fas fa-chevron-down" id="sold-icon" style="color: #888;"></i>
+                </button>
+                
+                <div id="sold-history-panel" style="display: none; margin-top: 15px; animation: fadeIn 0.3s ease;">
+                    <div class="glass-panel" style="padding: 0; background: transparent; box-shadow: none; border: none;">
+                        <table style="width: 100%;">
+                            <thead>
+                                <tr><th>Item</th><th>Price</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                {% for item in listings if item.stock == 0 %}
+                                <tr style="background: #f9fafb; border-color: #eee;">
+                                    <td data-label="Item" style="color: #555; font-weight: 500;">{{ item.item_name }}</td>
+                                    <td data-label="Price" style="color: #888;">₹{{ item.price }}</td>
+                                    <td data-label="Status">
+                                        <span style="background: #FEE2E2; color: #EF4444; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;">Sold Out</span>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                    <tr><td colspan="3" style="text-align: center; padding: 20px; color: #888; font-size: 0.9rem;">No archived items yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <h2 class="section-title" style="margin-top: 40px;">Recent Sales</h2>
-        <div class="glass-panel">
-            <table>
-                <thead>
-                    <tr><th>Item</th><th>Qty Sold</th><th>Earned</th><th>Date</th></tr>
-                </thead>
-                <tbody>
-                    {% for sale in sales %}
-                    <tr>
-                        <td>{{ sale.item_name }}</td>
-                        <td>{{ sale.quantity }} kg</td>
-                        <td style="color: var(--primary-main); font-weight: bold;">+ ₹{{ sale.total_price }}</td>
-                        <td style="color: #888; font-size: 0.9rem;">{{ sale.order_date }}</td>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="4" style="text-align: center; color: #888;">No sales yet.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- ==============================================
+             UPDATED: RECENT SALES (Collapsible on Mobile)
+             ============================================== -->
+        <div class="mobile-toggle-header" onclick="toggleMobileSection('recent-sales-panel', 'sales-chevron')" style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; margin-bottom: 15px;">
+            <h2 class="section-title" style="margin: 0; display: flex; align-items: center;">
+                <i class="fas fa-chart-bar" style="margin-right: 10px;"></i> Recent Sales
+                <i class="fas fa-chevron-down mobile-chevron" id="sales-chevron" style="margin-left: 10px; color: #888; font-size: 1rem;"></i>
+            </h2>
         </div>
-        <h2 class="section-title"><i class="fas fa-robot"></i> Professional Agri-Kit</h2>
-<div class="tool-grid" id="target-tools" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-    
-    <a href="{{ url_for('tool_soil') }}" class="glass-panel" style="text-decoration: none; text-align: center; border-bottom: 4px solid #8d6e63; transition: 0.3s; display: block; color: inherit;">
-        <div class="kit-layer" style="background: #efebe9; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
-            <i class="fas fa-flask" style="color: #8d6e63; font-size: 1.5rem;"></i>
-        </div>
-        <h4>Digital Soil Lab</h4>
-        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">pH & Fertilizer Calc</p>
-    </a>
 
-    <a href="{{ url_for('tool_pest') }}" class="glass-panel" style="text-decoration: none; text-align: center; border-bottom: 4px solid #ef4444; transition: 0.3s; display: block; color: inherit;">
-        <div class="kit-layer"style="background: #fee2e2; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
-            <i class="fas fa-bug" style="color: #ef4444; font-size: 1.5rem;"></i>
+        <div id="recent-sales-panel" class="collapsible-panel">
+            <div class="glass-panel" style="padding: 0;">
+                <table>
+                    <thead>
+                        <tr><th>Item</th><th>Qty Sold</th><th>Earned</th><th>Date</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                        <tr>
+                            <td data-label="Item" style="font-weight: 600;">{{ sale.item_name }}</td>
+                            <td data-label="Qty Sold" style="color: #666;">{{ sale.quantity }} kg</td>
+                            <td data-label="Earned" style="color: var(--primary-main); font-weight: bold; font-size: 1.1rem;">+ ₹{{ sale.total_price }}</td>
+                            <td data-label="Date" style="color: #999; font-size: 0.85rem;">{{ sale.order_date }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" style="text-align: center; color: #888; padding: 30px;">No sales history available.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <h4>Pest Doctor</h4>
-        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Organic & Chemical Rx</p>
-    </a>
 
-    <a href="{{ url_for('tool_crop') }}" class="glass-panel" style="text-decoration: none; text-align: center; border-bottom: 4px solid #10b981; transition: 0.3s; display: block; color: inherit;">
-        <div class="kit-layer"style="background: #d1fae5; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
-            <i class="fas fa-seedling" style="color: #10b981; font-size: 1.5rem;"></i>
-        </div>
-        <h4>Smart Crop Plan</h4>
-        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Profit & Yield Est.</p>
-    </a>
+        <!-- Professional Agri-Kit Remains Visible Always -->
+        <h2 class="section-title" style="margin-top: 40px;"><i class="fas fa-robot"></i> Professional Agri-Kit</h2>
+        <div class="tool-grid" id="target-tools" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
+            <a href="{{ url_for('tool_soil') }}" class="glass-panel" style="text-decoration: none; text-align: center; border-bottom: 5px solid #8d6e63; transition: 0.3s; display: block; color: inherit;">
+                <div class="kit-layer" style="background: #efebe9; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+                    <i class="fas fa-flask" style="color: #8d6e63; font-size: 1.8rem;"></i>
+                </div>
+                <h4 style="font-size: 1.1rem;">Digital Soil Lab</h4>
+                <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">pH & Fertilizer Calc</p>
+            </a>
 
-    <a href="{{ url_for('tool_water') }}" class="glass-panel" style="text-decoration: none; text-align: center; border-bottom: 4px solid #3b82f6; transition: 0.3s; display: block; color: inherit;">
-        <div class="kit-layer"style="background: #dbeafe; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
-            <i class="fas fa-tint" style="color: #3b82f6; font-size: 1.5rem;"></i>
+            <a href="{{ url_for('tool_pest') }}" class="glass-panel" style="text-decoration: none; text-align: center; border-bottom: 5px solid #ef4444; transition: 0.3s; display: block; color: inherit;">
+                <div class="kit-layer" style="background: #fee2e2; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+                    <i class="fas fa-bug" style="color: #ef4444; font-size: 1.8rem;"></i>
+                </div>
+                <h4 style="font-size: 1.1rem;">Pest Doctor</h4>
+                <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">Organic & Chemical Rx</p>
+            </a>
+
+            <a href="{{ url_for('tool_crop') }}" class="glass-panel" style="text-decoration: none; text-align: center; border-bottom: 5px solid #10b981; transition: 0.3s; display: block; color: inherit;">
+                <div class="kit-layer" style="background: #d1fae5; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+                    <i class="fas fa-seedling" style="color: #10b981; font-size: 1.8rem;"></i>
+                </div>
+                <h4 style="font-size: 1.1rem;">Smart Crop Plan</h4>
+                <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">Profit & Yield Est.</p>
+            </a>
+
+            <a href="{{ url_for('tool_water') }}" class="glass-panel" style="text-decoration: none; text-align: center; border-bottom: 5px solid #3b82f6; transition: 0.3s; display: block; color: inherit;">
+                <div class="kit-layer" style="background: #dbeafe; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+                    <i class="fas fa-tint" style="color: #3b82f6; font-size: 1.8rem;"></i>
+                </div>
+                <h4 style="font-size: 1.1rem;">Precision Water</h4>
+                <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">Pump Runtime Calc</p>
+            </a>
         </div>
-        <h4>Precision Water</h4>
-        <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Pump Runtime Calc</p>
-    </a>
-</div>
     </div>
 
+    <!-- RESTORED: CHAT BOT UI (Now with forced z-index inside HTML) -->
     <button class="chat-btn" onclick="toggleChat()"><i class="fas fa-robot"></i></button>
-    <div class="chat-window" id="chatWindow">
+    <div class="chat-window" id="chatWindow" style="z-index: 999999 !important;">
         <div class="chat-header">
-            <span>Agri-Bot</span>
-            <span style="cursor: pointer;" onclick="toggleChat()">&times;</span>
+            <span><i class="fas fa-robot"></i> Agri-Bot</span>
+            <span style="cursor: pointer; font-size: 1.2rem;" onclick="toggleChat()">&times;</span>
         </div>
         <div class="chat-body" id="chatBody">
             <div class="chat-message bot-msg">Namaste! How can I help your farm today?</div>
         </div>
         <div style="padding: 10px; background: white; border-top: 1px solid #eee; display: flex; gap: 5px;">
             <input type="text" id="userInput" placeholder="Ask anything..." style="flex: 1; padding: 10px; border: 1px solid #eee; border-radius: 20px; outline: none;" onkeypress="handleEnter(event)">
-            <button onclick="startVoiceInput()" id="micIcon" style="background: none; border: none; font-size: 1.2rem; color: var(--primary-dark); cursor: pointer;"><i class="fas fa-microphone"></i></button>
-            <button onclick="sendMessage()" style="background: none; border: none; font-size: 1.2rem; color: var(--primary-main); cursor: pointer;"><i class="fas fa-paper-plane"></i></button>
+            <button onclick="startVoiceInput()" id="micIcon" style="background: none; border: none; font-size: 1.2rem; color: var(--primary-dark); cursor: pointer; padding: 0 10px;"><i class="fas fa-microphone"></i></button>
+            <button onclick="sendMessage()" style="background: none; border: none; font-size: 1.2rem; color: var(--primary-main); cursor: pointer; padding: 0 10px;"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
+    <!-- Modals -->
     <div id="modal-weather" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('modal-weather')">&times;</span>
             <h2 style="color: var(--primary-dark); margin-bottom: 20px;">Detailed Weather Report</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
                 <div style="background: #f0fdf4; padding: 20px; border-radius: 15px;">
                     <h3>Today</h3>
-                    <p style="font-size: 2rem; font-weight: bold;">28°C</p>
-                    <p>Humidity: 65%</p>
-                    <p>Wind: NE 12 km/h</p>
+                    <p style="font-size: 2.5rem; font-weight: bold; color: var(--earth-dark);">28°C</p>
+                    <p style="color: #555;">Humidity: 65%</p>
+                    <p style="color: #555;">Wind: NE 12 km/h</p>
                 </div>
                 <div style="background: #f9fafb; padding: 20px; border-radius: 15px;">
                     <h3>Forecast</h3>
-                    <p><strong>Tomorrow:</strong> Light Rain 🌧️</p>
-                    <p><strong>Wednesday:</strong> Sunny ☀️</p>
+                    <p style="font-size: 1.1rem; margin-top: 10px;"><strong>Tomorrow:</strong> Light Rain 🌧️</p>
+                    <p style="font-size: 1.1rem; margin-top: 10px;"><strong>Wednesday:</strong> Sunny ☀️</p>
                 </div>
             </div>
-            
-
-            <img src="https://i.redd.it/my-take-on-a-weather-forecast-graph-v0-1m0eki8al6ic1.jpg?width=1290&format=pjpg&auto=webp&s=8a27ac6537f294279ce63baf722bda709968bf07" alt="wheather graph" style="width: 100%; margin-top: 20px; border-radius: 15px;">
-
+            <img src="https://i.redd.it/my-take-on-a-weather-forecast-graph-v0-1m0eki8al6ic1.jpg?width=1290&format=pjpg&auto=webp&s=8a27ac6537f294279ce63baf722bda709968bf07" alt="weather graph" style="width: 100%; margin-top: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
         </div>
     </div>
 
@@ -386,13 +471,13 @@
     <div id="modal-news" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeModal('modal-news')">&times;</span>
-            <h2 style="color: var(--primary-dark); margin-bottom: 20px;">Agri News</h2>
-            <p>1. New Subsidy Announced.</p>
-            <p>2. Cotton prices surging.</p>
-            
-
-[Image of solar irrigation pump]
-
+            <h2 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fas fa-newspaper"></i> Agri News</h2>
+            <div style="background: #f9fafb; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--primary-main);">
+                <strong>1. New Subsidy Announced.</strong><br><small style="color: #888;">Government releases new fund for drip irrigation.</small>
+            </div>
+            <div style="background: #f9fafb; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--primary-main);">
+                <strong>2. Cotton prices surging.</strong><br><small style="color: #888;">Market sees 12% rise in demand this week.</small>
+            </div>
         </div>
     </div>
 
@@ -400,45 +485,46 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('modal-notifications')">&times;</span>
             <h2 style="color: var(--primary-dark); margin-bottom: 20px;"><i class="fas fa-bell"></i> Alerts</h2>
-            <div class="glass-panel">
+            <div style="max-height: 350px; overflow-y: auto;">
                 {% for notif in notifications %}
-                    <div style="padding: 15px; border-bottom: 1px solid #eee;">
-                        <div style="font-weight: bold; color: var(--primary-dark);">{{ notif.message }}</div>
-                        <div style="font-size: 0.8rem; color: #888;">{{ notif.created_at }}</div>
+                    <div style="padding: 15px; border-bottom: 1px solid #eee; background: #fcfcfc; border-radius: 10px; margin-bottom: 8px;">
+                        <div style="font-weight: 600; color: #333;">{{ notif.message }}</div>
+                        <div style="font-size: 0.8rem; color: #999; margin-top: 5px;">{{ notif.created_at }}</div>
                     </div>
                 {% else %}
-                    <p style="text-align: center; color: #888;">No new notifications.</p>
+                    <p style="text-align: center; color: #888; padding: 20px;">No new notifications.</p>
                 {% endfor %}
             </div>
         </div>
     </div>
+
     <div id="modal-qr" class="modal">
-    <div class="modal-content" style="text-align: center; max-width: 400px;">
-        <span class="close" onclick="closeModal('modal-qr')">&times;</span>
-        <h2 style="color: var(--primary-dark);">Product Passport</h2>
-        <p id="qr-title" style="margin-bottom: 20px; font-weight: bold;"></p>
-        
-        <img id="qr-image" src="" style="width: 200px; height: 200px; border: 1px solid #ddd; padding: 10px;">
-        
-        <p style="font-size: 0.9rem; color: #666; margin-top: 15px;">
-            Attach this to your <strong><span id="qr-name"></span></strong> bags.<br>
-            Buyers can scan this to verify authenticity.
-        </p>
-        <button onclick="window.print()" class="btn-submit" style="margin-top: 10px; width: auto;">
-            <i class="fas fa-print"></i> Print Label
-        </button>
+        <div class="modal-content" style="text-align: center; max-width: 400px;">
+            <span class="close" onclick="closeModal('modal-qr')">&times;</span>
+            <h2 style="color: var(--primary-dark);">Product Passport</h2>
+            <p id="qr-title" style="margin-bottom: 20px; font-weight: bold;"></p>
+            
+            <img id="qr-image" src="" style="width: 200px; height: 200px; border: 1px solid #ddd; padding: 10px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            
+            <p style="font-size: 0.95rem; color: #555; margin-top: 20px; line-height: 1.5;">
+                Attach this to your <strong><span id="qr-name"></span></strong> bags.<br>
+                Buyers can scan this to verify authenticity.
+            </p>
+            <button onclick="window.print()" class="btn-submit" style="margin-top: 15px; width: 100%; border-radius: 12px;">
+                <i class="fas fa-print"></i> Print Label
+            </button>
+        </div>
     </div>
-</div>
-<!-- MOBILE BOTTOM NAV (Visible only on Phone) -->
-<div class="mobile-nav">
-    <a href="{{ url_for('farmer_dashboard') }}" class="active"><i class="fas fa-home"></i> Home</a>
-    <a href="{{ url_for('sell_crop') }}"><i class="fas fa-plus-circle" style="color: #FFC107; font-size: 2rem; margin-top: -10px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));"></i></a>
-    <a href="#" onclick="document.getElementById('modal-notifications').style.display='block'"><i class="fas fa-bell"></i> Alerts</a>
-    <a href="{{ url_for('settings') }}" id="target-profile"><i class="fas fa-user"></i> Profile</a>
-</div>
 
+    <!-- MOBILE BOTTOM NAV -->
+    <div class="mobile-nav">
+        <a href="{{ url_for('farmer_dashboard') }}" class="active"><i class="fas fa-home"></i> Home</a>
+        <a href="{{ url_for('sell_crop') }}"><i class="fas fa-plus-circle" style="color: #FFC107; font-size: 2.2rem; margin-top: -15px; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.15));"></i></a>
+        <a href="{{ url_for('chat_inbox') }}"><i class="fas fa-comment-dots"></i> Chat</a>
+        <a href="{{ url_for('settings') }}" id="target-profile"><i class="fas fa-user"></i> Profile</a>
+    </div>
 
-
+    <!-- SCRIPTS -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     
     <div id="google_translate_element" style="display:none;"></div>
@@ -450,78 +536,101 @@
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <script>
+        // --- NEW: Mobile Accordion Logic ---
+        function toggleMobileSection(panelId, chevronId) {
+            // Only fire on mobile layout (screen width <= 768px)
+            if(window.innerWidth > 768) return; 
+            
+            var panel = document.getElementById(panelId);
+            var chevron = document.getElementById(chevronId);
+            
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open');
+                chevron.classList.remove('fa-chevron-up');
+                chevron.classList.add('fa-chevron-down');
+            } else {
+                panel.classList.add('open');
+                chevron.classList.remove('fa-chevron-down');
+                chevron.classList.add('fa-chevron-up');
+            }
+        }
+
+        // Video Playlist Logic
+        const playlist = [
+            "{{ url_for('static', filename='videos/v1.mp4') }}",
+            "{{ url_for('static', filename='videos/v2.mp4') }}",
+            "{{ url_for('static', filename='videos/v3.mp4') }}" 
+        ];
+
+        let currentIdx = 0;
+        const p1 = document.getElementById('player1');
+        const p2 = document.getElementById('player2');
+        
+        p1.src = playlist[0];
+        p1.play().catch(e => console.log("Auto-play prevented."));
+
+        function nextVideo(activePlayer, hiddenPlayer) {
+            currentIdx = (currentIdx + 1) % playlist.length;
+            hiddenPlayer.src = playlist[currentIdx];
+            hiddenPlayer.play();
+            hiddenPlayer.classList.add('active'); 
+            activePlayer.classList.remove('active'); 
+            hiddenPlayer.onended = function() { nextVideo(hiddenPlayer, activePlayer); };
+        }
+        p1.onended = function() { nextVideo(p1, p2); };
+
         function toggleMenu() {
             var menu = document.getElementById("menuBox");
             menu.style.display = (menu.style.display === "block") ? "none" : "block";
         }
 
         document.addEventListener('click', function(event) {
-            var isClickInside = document.querySelector('.profile-container').contains(event.target);
-            var menu = document.getElementById("menuBox");
-            if (!isClickInside && menu.style.display === "block") {
-                menu.style.display = "none";
+            var profileContainer = document.querySelector('.profile-container');
+            if (profileContainer) {
+                var isClickInside = profileContainer.contains(event.target);
+                var menu = document.getElementById("menuBox");
+                if (!isClickInside && menu.style.display === "block") {
+                    menu.style.display = "none";
+                }
             }
         });
 
         function openModal(id) { document.getElementById(id).style.display = "block"; }
         function closeModal(id) { document.getElementById(id).style.display = "none"; }
 
-        // Chart.js - Corrected
-        // 1. Assign Jinja values to JS constants at the very top
-const currentEarnings = {{ stats.earnings or 0 }}; 
-
-const ctx = document.getElementById('salesChart').getContext('2d');
-const myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-            label: 'Revenue (₹)',
-            data: [12000, 19000, 3000, 5000, 2000, currentEarnings], // Use the constant here
-            backgroundColor: 'rgba(16, 185, 129, 0.2)',
-            borderColor: '#10b981',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.4
-        }]
-    },
-    options: { 
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true } }
-    }
-});
-    </script>
-    <script>
-        function addToCart(itemId) {
-            fetch('/api/add_to_cart', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ item_id: itemId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    document.getElementById('cart-count').innerText = data.cart_count;
-                    var x = document.getElementById("toast");
-                    x.className = "show";
-                    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
-                } else if (data.message === 'Please login') {
-                    // REDIRECT TO LOGIN IF GUEST
-                    window.location.href = "{{ url_for('login') }}";
-                } else {
-                    alert('Error: ' + data.message);
+        // Chart.js Setup
+        const currentEarnings = {{ stats.earnings or 0 }}; 
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: [12000, 19000, 3000, 5000, 2000, currentEarnings],
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    borderColor: '#10b981',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#10b981',
+                    pointRadius: 4
+                }]
+            },
+            options: { 
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                    x: { grid: { display: false } }
                 }
-            });
-        }
-    </script>
-    <script>
-        // ... (Your existing scripts) ...
+            }
+        });
 
         function toggleSoldHistory() {
             var panel = document.getElementById("sold-history-panel");
             var icon = document.getElementById("sold-icon");
-            
             if (panel.style.display === "none") {
                 panel.style.display = "block";
                 icon.classList.remove("fa-chevron-down");
@@ -532,17 +641,13 @@ const myChart = new Chart(ctx, {
                 icon.classList.add("fa-chevron-down");
             }
         }
+
         function openQR(itemName, itemId) {
-    // Set the Title
-    document.getElementById('qr-title').innerText = "QR Code for " + itemName;
-    document.getElementById('qr-name').innerText = itemName;
-    
-    // Set the Image Source to the Python Route
-    document.getElementById('qr-image').src = "/generate_qr/" + itemId;
-    
-    // Open Modal
-    document.getElementById('modal-qr').style.display = "block";
-}
+            document.getElementById('qr-title').innerText = "QR Code for " + itemName;
+            document.getElementById('qr-name').innerText = itemName;
+            document.getElementById('qr-image').src = "/generate_qr/" + itemId;
+            document.getElementById('modal-qr').style.display = "block";
+        }
     </script>
 </body>
 </html>
