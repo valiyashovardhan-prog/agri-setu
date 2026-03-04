@@ -230,15 +230,40 @@
         </div>
     </div>
 
+    <!-- ADDED: The Mobile Menu Box (Hidden by default) -->
+    <div id="mobileMenuBox" style="position: fixed; bottom: 80px; right: 20px; width: 160px; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; z-index: 10000;">
+        <a href="{{ url_for('my_orders') }}" style="padding: 12px 15px; color: #333; text-decoration: none; border-bottom: 1px solid #f9f9f9; font-weight: 500;"><i class="fas fa-box" style="width: 20px; color: var(--primary-dark);"></i> My Orders</a>
+        <a href="{{ url_for('logout') }}" style="padding: 12px 15px; color: #ef4444; text-decoration: none; font-weight: 500;"><i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout</a>
+    </div>
+
     <!-- MOBILE BOTTOM NAV -->
     <div class="mobile-nav">
         <a href="{{ url_for('consumer_dashboard') }}"><i class="fas fa-store"></i> Market</a>
         <a href="{{ url_for('cart') }}"><i class="fas fa-shopping-cart"></i> Cart</a>
         <a href="{{ url_for('my_orders') }}" class="active"><i class="fas fa-box"></i> Orders</a>
-        <a href="{{ url_for('settings') }}"><i class="fas fa-user"></i> Profile</a>
+        <!-- FIX: Updated Profile link to open menu instead of redirecting -->
+        <a href="#" onclick="toggleMobileMenu(); return false;"><i class="fas fa-user"></i> Profile</a>
     </div>
 
     <script>
+        // ADDED: Mobile Dropdown Logic
+        function toggleMobileMenu() {
+            var menu = document.getElementById("mobileMenuBox");
+            if (menu) {
+                menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+            }
+        }
+
+        // Close menu if clicked outside
+        document.addEventListener('click', function(event) {
+            var menu = document.getElementById("mobileMenuBox");
+            if (menu && menu.style.display === "flex") {
+                if (!event.target.closest('.mobile-nav') && !event.target.closest('#mobileMenuBox')) {
+                    menu.style.display = "none";
+                }
+            }
+        });
+
         function openRateModal(orderId, farmerId) {
             document.getElementById('modal_order_id').value = orderId;
             document.getElementById('modal_farmer_id').value = farmerId;

@@ -7,11 +7,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* ========================================================
-           🌟 PREMIUM MOBILE E-COMMERCE STYLES (Only < 768px) 🌟
-           ======================================================== */
         .mobile-top-header { display: none; }
-        .ci-bottom-row { display: contents; } /* Desktop fallback for wrapper */
+        .ci-bottom-row { display: contents; } 
 
         @media (hover: none) {
             .btn-submit:hover { transform: none !important; background: var(--harvest-gold) !important; }
@@ -20,10 +17,8 @@
 
         @media (max-width: 768px) {
             .hide-on-mobile { display: none !important; }
-            
             .container { padding-bottom: 100px !important; margin-top: 20px !important; }
 
-            /* 1. Sticky Mobile Header */
             .mobile-top-header {
                 display: flex !important; justify-content: space-between; align-items: center;
                 padding: 15px 20px; background: rgba(255, 255, 255, 0.9);
@@ -31,85 +26,29 @@
                 position: sticky; top: 0; z-index: 4000; box-shadow: 0 2px 15px rgba(0,0,0,0.04);
             }
 
-            /* 2. Layout Stacking */
-            .cart-layout {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 20px !important;
-            }
+            .cart-layout { display: flex !important; flex-direction: column !important; gap: 20px !important; }
+            .cart-items-container { background: transparent !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
 
-            .cart-items-container {
-                background: transparent !important;
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-            }
-
-            /* 3. Mobile Cart Item Card */
             .cart-item {
-                background: white !important;
-                flex-wrap: wrap !important;
-                position: relative !important;
-                padding: 15px !important;
-                border-radius: 16px !important;
-                margin-bottom: 15px !important;
-                border: 1px solid #f0f0f0 !important;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important;
-                display: flex !important;
-                align-items: flex-start !important; /* Align items to top */
+                background: white !important; flex-wrap: wrap !important; position: relative !important;
+                padding: 15px !important; border-radius: 16px !important; margin-bottom: 15px !important;
+                border: 1px solid #f0f0f0 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important;
+                display: flex !important; align-items: flex-start !important; 
             }
             
-            .ci-icon { 
-                width: 50px !important; 
-                height: 50px !important; 
-                margin-right: 15px !important; 
-                border-radius: 12px !important; 
-                flex-shrink: 0 !important;
-            }
-            
-            .ci-details { 
-                flex: 1 !important; 
-                padding-right: 40px !important; /* Leave space for delete button */
-            }
+            .ci-icon { width: 50px !important; height: 50px !important; margin-right: 15px !important; border-radius: 12px !important; flex-shrink: 0 !important; }
+            .ci-details { flex: 1 !important; padding-right: 40px !important; }
             .ci-details h3 { font-size: 1.1rem !important; margin-bottom: 3px !important; color: #222 !important; }
             
-            /* FIX: Strict Override for Delete Button */
-            .ci-delete { 
-                position: absolute !important; 
-                top: 15px !important; 
-                right: 15px !important; 
-                width: 36px !important;  /* Strictly prevent 100% width stretch */
-                height: 36px !important; /* Strictly prevent 100% height stretch */
-                background: #fef2f2 !important;
-                color: #ef4444 !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                border-radius: 50% !important; /* Make it a perfect neat circle */
-                z-index: 10 !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15) !important;
-            }
-
-            /* Stack Qty and Price at the bottom */
             .ci-bottom-row {
-                width: 100% !important;
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                margin-top: 15px !important;
-                padding-top: 15px !important;
+                width: 100% !important; display: flex !important; justify-content: space-between !important;
+                align-items: center !important; margin-top: 15px !important; padding-top: 15px !important;
                 border-top: 1px dashed #eee !important;
             }
-
             .ci-qty { margin-right: 0 !important; padding: 5px 15px !important; }
             .ci-total { width: auto !important; margin-right: 0 !important; text-align: right !important; font-size: 1.25rem !important; color: var(--earth-dark) !important; }
-
-            /* 4. Order Summary Panel */
             .order-summary-panel { border-radius: 20px !important; padding: 25px !important; }
 
-            /* 5. Bottom Nav */
             .mobile-nav {
                 display: flex !important; justify-content: space-around !important; align-items: center !important;
                 position: fixed !important; bottom: 0 !important; left: 0 !important; width: 100% !important; z-index: 9999 !important;
@@ -129,7 +68,6 @@
 </head>
 <body>
 
-    <!-- MOBILE TOP HEADER -->
     <div class="mobile-top-header">
         <a href="{{ url_for('consumer_dashboard') }}" style="color: var(--primary-dark); font-size: 1.2rem; text-decoration: none;">
             <i class="fas fa-arrow-left"></i>
@@ -137,10 +75,9 @@
         <div style="color: var(--primary-dark); font-weight: 700; font-size: 1.1rem;">
             <i class="fas fa-shopping-cart"></i> My Cart
         </div>
-        <div style="width: 20px;"></div> <!-- Spacer for centering -->
+        <div style="width: 20px;"></div> 
     </div>
 
-    <!-- DESKTOP NAVBAR -->
     <nav class="navbar hide-on-mobile">
         <div class="logo"><i class="fas fa-shopping-cart"></i> My Cart</div>
         <a href="{{ url_for('consumer_dashboard') }}" class="btn-submit" style="width: auto; background: white; color: var(--text-main); border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
@@ -163,6 +100,7 @@
             
             <div class="glass-panel cart-items-container" style="padding: 0;">
                 {% for item in cart %}
+                <!-- Item Card -->
                 <div class="cart-item" id="row-{{ item.id }}" style="display: flex; align-items: center; padding: 20px; border-bottom: 1px solid #eee; position: relative;">
                     
                     <div class="ci-icon" style="width: 60px; height: 60px; background: #f0fdf4; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary-main); margin-right: 20px;">
@@ -174,7 +112,6 @@
                         <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9rem;">Unit Price: ₹<span class="u-price">{{ item.price }}</span>/kg</p>
                     </div>
 
-                    <!-- Wrapper to handle responsive layout cleanly -->
                     <div class="ci-bottom-row">
                         <div class="ci-qty" style="display: flex; align-items: center; background: #f3f4f6; border-radius: 30px; padding: 5px 10px; margin-right: 20px;">
                             <button onclick="updateQty({{ item.id }}, 'decrease')" style="border:none; background:none; cursor:pointer; font-weight:bold; padding: 5px 15px; font-size: 1.1rem; color: #555;">-</button>
@@ -187,10 +124,10 @@
                         </div>
                     </div>
 
-                    <!-- The Delete Button -->
-                    <button class="ci-delete" onclick="removeItem({{ item.id }})" style="border: none; background: none; color: #ef4444; cursor: pointer; font-size: 1rem; transition: 0.2s;">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+                    <!-- BULLETPROOF INLINE DELETE BUTTON (Bypasses Cache) -->
+                    <div onclick="removeItem({{ item.id }})" style="position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; background-color: #fef2f2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 50;">
+                        <i class="fas fa-trash-alt" style="font-size: 1rem;"></i>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -221,17 +158,40 @@
         {% endif %}
     </div>
 
+    <!-- ADDED: The Mobile Menu Box (Hidden by default) -->
+    <div id="mobileMenuBox" style="position: fixed; bottom: 80px; right: 20px; width: 160px; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; z-index: 10000;">
+        <a href="{{ url_for('my_orders') }}" style="padding: 12px 15px; color: #333; text-decoration: none; border-bottom: 1px solid #f9f9f9; font-weight: 500;"><i class="fas fa-box" style="width: 20px; color: var(--primary-dark);"></i> My Orders</a>
+        <a href="{{ url_for('logout') }}" style="padding: 12px 15px; color: #ef4444; text-decoration: none; font-weight: 500;"><i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout</a>
+    </div>
+
     <!-- MOBILE BOTTOM NAV -->
     <div class="mobile-nav">
         <a href="{{ url_for('consumer_dashboard') }}"><i class="fas fa-store"></i> Market</a>
-        <a href="{{ url_for('cart') }}" class="active">
-            <i class="fas fa-shopping-cart"></i> Cart
-        </a>
+        <a href="{{ url_for('cart') }}" class="active"><i class="fas fa-shopping-cart"></i> Cart</a>
         <a href="{{ url_for('my_orders') }}"><i class="fas fa-box"></i> Orders</a>
-        <a href="{{ url_for('settings') }}"><i class="fas fa-user"></i> Profile</a>
+        <!-- FIX: Updated Profile link to open menu instead of redirecting -->
+        <a href="#" onclick="toggleMobileMenu(); return false;"><i class="fas fa-user"></i> Profile</a>
     </div>
 
     <script>
+        // ADDED: Mobile Dropdown Logic
+        function toggleMobileMenu() {
+            var menu = document.getElementById("mobileMenuBox");
+            if (menu) {
+                menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+            }
+        }
+
+        // Close menu if clicked outside
+        document.addEventListener('click', function(event) {
+            var menu = document.getElementById("mobileMenuBox");
+            if (menu && menu.style.display === "flex") {
+                if (!event.target.closest('.mobile-nav') && !event.target.closest('#mobileMenuBox')) {
+                    menu.style.display = "none";
+                }
+            }
+        });
+
         function updateQty(itemId, action) {
             fetch('/api/update_cart', {
                 method: 'POST',
@@ -241,7 +201,6 @@
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
-                    // Update UI Numbers without reloading
                     let qtySpan = document.getElementById('qty-' + itemId);
                     let currentQty = parseInt(qtySpan.innerText);
                     
@@ -251,7 +210,6 @@
                     qtySpan.innerText = currentQty;
                     recalcTotals();
                 } else if (data.status === 'error') {
-                    // SHOW ALERT IF STOCK LIMIT REACHED
                     alert(data.message);
                 }
             });
@@ -290,6 +248,5 @@
             document.getElementById('grand-total').innerText = subtotal.toFixed(1);
         }
     </script>
-
 </body>
 </html>

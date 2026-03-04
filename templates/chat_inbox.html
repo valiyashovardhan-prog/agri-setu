@@ -2,36 +2,131 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Messages | Agri Setu</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- DESKTOP CHAT ITEM STYLES --- */
+        .chat-item {
+            display: flex; 
+            padding: 15px 20px; 
+            border-bottom: 1px solid #eee; 
+            align-items: center; 
+            text-decoration: none; 
+            color: inherit; 
+            transition: 0.2s;
+        }
+        .chat-item:last-child { border-bottom: none; }
+        .chat-item:hover { background: #f9fafb; transform: translateX(5px); }
+
+        .chat-avatar {
+            width: 55px; height: 55px; 
+            border-radius: 50%; 
+            margin-right: 15px;
+            border: 2px solid #eee;
+        }
+
+        /* ========================================================
+           🌟 PREMIUM MOBILE E-COMMERCE STYLES (Only < 768px) 🌟
+           ======================================================== */
+        .mobile-top-header { display: none; }
+
+        @media (hover: none) {
+            .chat-item:hover { transform: none !important; background: transparent !important; }
+            .btn-secondary:hover { transform: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            .hide-on-mobile { display: none !important; }
+            
+            .container { padding-bottom: 40px !important; margin-top: 15px !important; }
+            .section-title { font-size: 1.2rem !important; margin-left: 5px !important; margin-top: 10px !important; }
+
+            /* 1. Sticky Mobile Header */
+            .mobile-top-header {
+                display: flex !important; align-items: center; gap: 15px;
+                padding: 15px 20px; background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+                position: sticky; top: 0; z-index: 4000; box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+            }
+
+            /* 2. Chat List Container */
+            .chat-list-container {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+
+            /* 3. Mobile Chat Cards (Floating App Style) */
+            .chat-item {
+                background: white !important;
+                border-radius: 16px !important;
+                margin-bottom: 12px !important;
+                border: 1px solid #f0f0f0 !important;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important;
+                padding: 15px !important;
+            }
+            .chat-item:active { background: #f0fdf4 !important; transform: scale(0.98) !important; }
+
+            .chat-avatar { width: 50px !important; height: 50px !important; }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
+
+    <!-- MOBILE TOP HEADER -->
+    <div class="mobile-top-header">
+        <a href="javascript:history.back()" style="color: var(--primary-dark); font-size: 1.2rem; text-decoration: none; display: flex; align-items: center; justify-content: center; width: 35px; height: 35px; background: #f0fdf4; border-radius: 50%;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div style="color: var(--primary-dark); font-weight: 700; font-size: 1.15rem;">
+            Messages
+        </div>
+    </div>
+
+    <!-- DESKTOP NAVBAR -->
+    <nav class="navbar hide-on-mobile">
         <div class="logo"><i class="fas fa-comments"></i> Messages</div>
-        <a href="javascript:history.back()" class="btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
+        <a href="javascript:history.back()" class="btn-secondary" style="background:white; color:#2E7D32; border:none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"><i class="fas fa-arrow-left"></i> Back</a>
     </nav>
 
     <div class="container" style="margin-top: 20px; max-width: 600px;">
-        <h2 class="section-title">Your Conversations</h2>
+        <h2 class="section-title hide-on-mobile">Your Conversations</h2>
         
-        <div class="glass-panel" style="padding: 0;">
+        <div class="glass-panel chat-list-container" style="padding: 0;">
             {% for chat in conversations %}
-            <a href="{{ url_for('chat_room', other_user_id=chat.id) }}" style="display: flex; padding: 15px; border-bottom: 1px solid #eee; align-items: center; text-decoration: none; color: inherit; transition: 0.2s;">
-                <img src="https://ui-avatars.com/api/?name={{ chat.username }}&background=random" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">
-                <div style="flex: 1;">
-                    <div style="font-weight: bold; font-size: 1.1rem;">{{ chat.username }} <small style="font-weight: normal; color: #888;">({{ chat.role }})</small></div>
-                    <div style="color: #666; font-size: 0.9rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 250px;">
-                        {{ chat.last_message }}
+            <a href="{{ url_for('chat_room', other_user_id=chat.id) }}" class="chat-item">
+                
+                <img src="https://ui-avatars.com/api/?name={{ chat.username }}&background=2E7D32&color=fff" class="chat-avatar">
+                
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 700; font-size: 1.05rem; color: #222; display: flex; justify-content: space-between; align-items: center;">
+                        {{ chat.username }}
+                        <span style="font-size: 0.75rem; font-weight: 500; color: #aaa; background: #f5f5f5; padding: 2px 8px; border-radius: 10px;">{{ chat.role }}</span>
+                    </div>
+                    
+                    <div style="color: #666; font-size: 0.9rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-top: 4px;">
+                        {% if chat.last_message %}
+                            {{ chat.last_message }}
+                        {% else %}
+                            <i>Start chatting...</i>
+                        {% endif %}
                     </div>
                 </div>
-                <div style="font-size: 0.8rem; color: #aaa;">&gt;</div>
+
+                <div style="font-size: 0.9rem; color: #ccc; margin-left: 15px;">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
             </a>
             {% else %}
-            <div style="padding: 40px; text-align: center; color: #888;">
-                <i class="far fa-paper-plane fa-3x"></i>
-                <p>No messages yet. Start a conversation from a profile!</p>
+            <div style="padding: 50px 20px; text-align: center; color: #888; background: white; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.03);">
+                <div style="width: 80px; height: 80px; background: #f9f9f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                    <i class="far fa-paper-plane fa-2x" style="color: #ccc;"></i>
+                </div>
+                <h3 style="color: #444; margin-bottom: 5px;">No messages yet</h3>
+                <p style="font-size: 0.95rem;">Start a conversation from a user's profile to see it here!</p>
             </div>
             {% endfor %}
         </div>

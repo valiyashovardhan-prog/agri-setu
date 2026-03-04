@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Settings | Agri Setu</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -34,16 +35,110 @@
             width: 100%; padding: 15px 0; border: none; background: transparent; outline: none; font-size: 1rem;
         }
 
-        /* Mobile Responsive */
+        /* ========================================================
+           🌟 PREMIUM MOBILE E-COMMERCE STYLES (Only < 768px) 🌟
+           ======================================================== */
+        .mobile-top-header { display: none; }
+
+        @media (hover: none) {
+            .btn-submit:hover { transform: none !important; }
+            .header-icon-btn:hover { transform: none !important; }
+            .logout-btn:hover { transform: none !important; }
+        }
+
         @media (max-width: 768px) {
-            .settings-grid { grid-template-columns: 1fr; }
+            .hide-on-mobile { display: none !important; }
+            
+            .container { padding-bottom: 100px !important; margin-top: 15px !important; }
+            .settings-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+
+            /* 1. Mobile Top Header */
+            .mobile-top-header {
+                display: flex !important; justify-content: space-between; align-items: center;
+                padding: 15px 20px; background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+                position: sticky; top: 0; z-index: 4000; box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+            }
+            .header-icon-btn {
+                width: 40px; height: 40px; border-radius: 50%; background: #f0fdf4;
+                display: flex; justify-content: center; align-items: center;
+                color: var(--earth-dark); text-decoration: none; font-size: 1.1rem;
+            }
+
+            /* 2. Glass Panel Adjustments */
+            .glass-panel {
+                padding: 20px !important;
+                border-radius: 24px !important;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
+                border: 1px solid #f0f0f0 !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* 3. Form Refinements */
+            .icon-input {
+                border-radius: 16px !important;
+                padding: 5px 15px !important;
+                background: #fdfdfd !important;
+            }
+            .icon-input input, .icon-input textarea {
+                padding: 15px 0 !important;
+                font-size: 1.05rem !important;
+            }
+            label { font-size: 0.9rem !important; color: #555 !important; }
+
+            .btn-submit {
+                width: 100% !important;
+                padding: 16px !important;
+                border-radius: 16px !important;
+                font-size: 1.1rem !important;
+            }
+
+            /* 4. Native App style Logout */
+            .logout-btn {
+                background: #fef2f2 !important;
+                border: none !important;
+                color: #ef4444 !important;
+                font-weight: 700 !important;
+                border-radius: 16px !important;
+                padding: 16px !important;
+            }
+
+            /* 5. Bottom Nav */
+            .mobile-nav {
+                display: flex !important; justify-content: space-around !important; align-items: center !important;
+                position: fixed !important; bottom: 0 !important; left: 0 !important; width: 100% !important; z-index: 9999 !important;
+                background: rgba(255, 255, 255, 0.9) !important; backdrop-filter: blur(20px) !important; -webkit-backdrop-filter: blur(20px) !important;
+                border-top: 1px solid rgba(0,0,0,0.05) !important; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)) !important; 
+                box-shadow: 0 -10px 30px rgba(0,0,0,0.05) !important;
+            }
+            .mobile-nav a { 
+                position: relative !important; display: flex !important; flex-direction: column !important;
+                align-items: center !important; gap: 5px !important; text-decoration: none !important;
+                color: #888 !important; font-size: 0.75rem !important; font-weight: 600 !important;
+            }
+            .mobile-nav a.active { color: var(--primary-dark) !important; }
+            .mobile-nav i { font-size: 1.4rem !important; }
         }
     </style>
 </head>
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar">
+    <!-- MOBILE TOP HEADER -->
+    <div class="mobile-top-header">
+        {% if session['role'] == 'Farmer' %}
+            <a href="{{ url_for('farmer_dashboard') }}" class="header-icon-btn"><i class="fas fa-arrow-left"></i></a>
+        {% else %}
+            <a href="{{ url_for('consumer_dashboard') }}" class="header-icon-btn"><i class="fas fa-arrow-left"></i></a>
+        {% endif %}
+        
+        <div style="color: var(--primary-dark); font-weight: 700; font-size: 1.1rem;">
+            Account Settings
+        </div>
+        <div style="width: 40px;"></div> <!-- Spacer for centering -->
+    </div>
+
+    <!-- DESKTOP NAVBAR -->
+    <nav class="navbar hide-on-mobile">
         <div class="logo"><i class="fas fa-cog"></i> Settings</div>
         
         <!-- Back Button Logic: SOLID WHITE STYLE -->
@@ -60,41 +155,42 @@
 
     <div class="container" style="margin-top: 40px;">
         
-        <h1 class="section-title" style="margin-top: 0; margin-bottom: 30px;">Account Controls</h1>
+        <h1 class="section-title hide-on-mobile" style="margin-top: 0; margin-bottom: 30px;">Account Controls</h1>
 
         <div class="settings-grid">
             
             <!-- LEFT COLUMN: Profile Form -->
             <div class="glass-panel">
                 <div style="border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 10px;">
-                    <h2 style="color: var(--earth-dark); margin: 0;">Public Profile</h2>
-                    <p style="color: var(--text-muted); font-size: 0.9rem;">This information is visible to buyers.</p>
+                    <h2 style="color: var(--earth-dark); margin: 0; font-size: 1.3rem;">Public Profile</h2>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">This information is visible to other users.</p>
                 </div>
 
                 <form action="{{ url_for('update_profile') }}" method="POST">
                     
                     <div style="margin-bottom: 20px;">
                         <label style="font-weight: 600; display: block; margin-bottom: 8px;">Username</label>
-                        <div class="icon-input" style="background: #eee; cursor: not-allowed;">
+                        <div class="icon-input" style="background: #f5f5f5; cursor: not-allowed;">
                             <i class="fas fa-user"></i>
-                            <input type="text" value="{{ username }}" disabled style="color: #666;">
+                            <input type="text" value="{{ username }}" disabled style="color: #888;">
                         </div>
-                        <small style="color: #888;">Username cannot be changed.</small>
+                        <small style="color: #999; margin-top: 5px; display: block;">Username cannot be changed.</small>
                     </div>
 
                     <div style="margin-bottom: 20px;">
                         <label style="font-weight: 600; display: block; margin-bottom: 8px;">Contact Number</label>
                         <div class="icon-input">
                             <i class="fas fa-phone-alt"></i>
-                            <input type="text" name="phone" placeholder="e.g. +91 98765 43210" required>
+                            <!-- Safely rendering phone or empty string -->
+                            <input type="text" name="phone" value="{{ phone if phone and phone != 'Not Provided' else '' }}" placeholder="e.g. +91 98765 43210" required>
                         </div>
                     </div>
 
                     <div style="margin-bottom: 30px;">
-                        <label style="font-weight: 600; display: block; margin-bottom: 8px;">Bio / Farm Details</label>
+                        <label style="font-weight: 600; display: block; margin-bottom: 8px;">Bio / Details</label>
                         <div class="icon-input">
                             <i class="fas fa-align-left" style="align-self: flex-start; margin-top: 15px;"></i>
-                            <textarea name="about_me" rows="4" placeholder="Share details about your farming methods..."></textarea>
+                            <textarea name="about_me" rows="4" placeholder="Share details about yourself or your farming methods...">{{ about_me if about_me else '' }}</textarea>
                         </div>
                     </div>
 
@@ -113,7 +209,7 @@
                 <div class="glass-panel" style="padding: 20px;">
                     <h3 style="margin-top: 0; color: var(--earth-dark);"><i class="fas fa-globe"></i> Language</h3>
                     <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">Choose your preferred language.</p>
-                    <div style="background: #f0fdf4; padding: 10px; border-radius: 10px; border: 1px dashed var(--earth-dark);">
+                    <div style="background: #f0fdf4; padding: 10px; border-radius: 12px; border: 1px dashed var(--earth-dark); overflow: hidden;">
                         <div id="google_translate_element"></div>
                     </div>
                 </div>
@@ -122,14 +218,14 @@
                 <div class="glass-panel" style="padding: 20px; background: #FFF8E1; border-bottom-color: var(--harvest-gold);">
                     <h3 style="margin-top: 0; color: #F57F17;"><i class="fas fa-headset"></i> Need Help?</h3>
                     <p style="font-size: 0.9rem; margin-bottom: 15px;">Call our Kisan Helpline.</p>
-                    <a href="tel:18001801551" style="color: #F57F17; font-weight: bold; text-decoration: none;">
+                    <a href="tel:18001801551" style="color: #F57F17; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; background: rgba(245, 127, 23, 0.1); padding: 8px 15px; border-radius: 10px;">
                         <i class="fas fa-phone"></i> 1800-180-1551
                     </a>
                 </div>
 
                 <!-- Logout Card -->
                 <div class="glass-panel" style="padding: 20px; text-align: center;">
-                    <a href="{{ url_for('logout') }}" style="color: var(--danger); text-decoration: none; font-weight: bold; display: block; padding: 10px; border: 2px solid var(--danger); border-radius: 50px; transition: 0.2s;">
+                    <a href="{{ url_for('logout') }}" class="logout-btn" style="color: var(--danger); text-decoration: none; font-weight: bold; display: block; padding: 12px; border: 2px solid var(--danger); border-radius: 50px; transition: 0.2s;">
                         <i class="fas fa-sign-out-alt"></i> Log Out
                     </a>
                 </div>
@@ -139,8 +235,33 @@
         </div>
     </div>
 
-    <!-- GOOGLE TRANSLATE SCRIPT -->
+    <!-- DYNAMIC MOBILE BOTTOM NAV -->
+    {% if session['role'] == 'Farmer' %}
+        <!-- Farmer Bottom Nav -->
+        <div class="mobile-nav">
+            <a href="{{ url_for('farmer_dashboard') }}"><i class="fas fa-home"></i> Home</a>
+            <a href="{{ url_for('sell_crop') }}"><i class="fas fa-plus-circle" style="color: #FFC107; font-size: 2.2rem; margin-top: -15px; filter: drop-shadow(0 6px 10px rgba(0,0,0,0.15));"></i></a>
+            <a href="{{ url_for('chat_inbox') }}"><i class="fas fa-comment-dots"></i> Chat</a>
+            <a href="{{ url_for('settings') }}" class="active"><i class="fas fa-user"></i> Profile</a>
+        </div>
+    {% else %}
+        <!-- Consumer Mobile Menu Box -->
+        <div id="mobileMenuBox" style="position: fixed; bottom: 80px; right: 20px; width: 160px; background: white; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); display: none; flex-direction: column; overflow: hidden; border: 1px solid #eee; z-index: 10000;">
+            <a href="{{ url_for('my_orders') }}" style="padding: 12px 15px; color: #333; text-decoration: none; border-bottom: 1px solid #f9f9f9; font-weight: 500;"><i class="fas fa-box" style="width: 20px; color: var(--primary-dark);"></i> My Orders</a>
+            <a href="{{ url_for('logout') }}" style="padding: 12px 15px; color: #ef4444; text-decoration: none; font-weight: 500;"><i class="fas fa-sign-out-alt" style="width: 20px;"></i> Logout</a>
+        </div>
+        <!-- Consumer Bottom Nav -->
+        <div class="mobile-nav">
+            <a href="{{ url_for('consumer_dashboard') }}"><i class="fas fa-store"></i> Market</a>
+            <a href="{{ url_for('cart') }}"><i class="fas fa-shopping-cart"></i> Cart</a>
+            <a href="{{ url_for('my_orders') }}"><i class="fas fa-box"></i> Orders</a>
+            <a href="#" onclick="toggleMobileMenu(); return false;" class="active"><i class="fas fa-user"></i> Profile</a>
+        </div>
+    {% endif %}
+
+    <!-- SCRIPTS -->
     <script type="text/javascript">
+        // Google Translate Logic
         function googleTranslateElementInit() {
           new google.translate.TranslateElement({
             pageLanguage: 'en', 
@@ -148,6 +269,23 @@
             layout: google.translate.TranslateElement.InlineLayout.SIMPLE
           }, 'google_translate_element');
         }
+
+        // Consumer Menu Dropdown Logic (Only active if consumer)
+        function toggleMobileMenu() {
+            var menu = document.getElementById("mobileMenuBox");
+            if (menu) {
+                menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            var menu = document.getElementById("mobileMenuBox");
+            if (menu && menu.style.display === "flex") {
+                if (!event.target.closest('.mobile-nav') && !event.target.closest('#mobileMenuBox')) {
+                    menu.style.display = "none";
+                }
+            }
+        });
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>

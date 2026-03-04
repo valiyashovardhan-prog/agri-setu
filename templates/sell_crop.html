@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart List | Agri Setu</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Layout Grid */
+        /* ========================================================
+           DESKTOP STYLES (Your Original Layout)
+           ======================================================== */
         .sell-grid {
             display: grid;
             grid-template-columns: 1.5fr 1fr;
@@ -16,7 +18,6 @@
             align-items: start;
         }
 
-        /* Form Styling */
         .input-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -30,77 +31,46 @@
         }
 
         .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 0.95rem;
+            display: block; margin-bottom: 8px;
+            font-weight: 600; color: #333; font-size: 0.95rem;
         }
 
-        .input-group input, 
-        .input-group select, 
-        .input-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-            background: #fff;
-            font-family: inherit;
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%; padding: 12px 15px;
+            border: 2px solid #e0e0e0; border-radius: 12px;
+            font-size: 1rem; outline: none; transition: border-color 0.3s;
+            background: #fff; font-family: inherit;
         }
 
-        .input-group input:focus, 
-        .input-group select:focus, 
-        .input-group textarea:focus {
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
             border-color: var(--earth-dark);
         }
 
         /* Unit Toggle Switch */
         .unit-toggle { 
-            display: flex; 
-            gap: 5px; 
-            background: #f5f5f5; 
-            padding: 5px; 
-            border-radius: 12px; 
-            border: 1px solid #e0e0e0;
+            display: flex; gap: 5px; background: #f5f5f5; 
+            padding: 5px; border-radius: 12px; border: 1px solid #e0e0e0;
         }
         .unit-option {
-            flex: 1; 
-            padding: 8px; 
-            text-align: center; 
-            cursor: pointer;
-            border-radius: 8px; 
-            font-size: 0.85rem; 
-            font-weight: 600; 
-            color: #666; 
-            transition: 0.3s;
+            flex: 1; padding: 8px; text-align: center; cursor: pointer;
+            border-radius: 8px; font-size: 0.85rem; font-weight: 600; 
+            color: #666; transition: 0.3s;
         }
         .unit-option.active { 
-            background: white; 
-            color: var(--earth-dark); 
+            background: white; color: var(--earth-dark); 
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
         }
         .hidden-radio { display: none; }
 
         /* Auto-Complete Dropdown */
         .suggestions-box {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            border: 1px solid #ddd;
-            width: 100%;
-            max-height: 150px;
-            overflow-y: auto;
-            border-radius: 0 0 12px 12px;
-            z-index: 100;
-            display: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: absolute; top: 100%; left: 0; background: white;
+            border: 1px solid #ddd; width: 100%; max-height: 200px;
+            overflow-y: auto; border-radius: 0 0 12px 12px;
+            z-index: 100; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
-        .suggestion-item { padding: 10px 15px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid #f5f5f5; }
-        .suggestion-item:hover { background: #f0fdf4; color: var(--earth-dark); font-weight: 600; }
+        .suggestion-item { padding: 12px 15px; cursor: pointer; transition: 0.2s; border-bottom: 1px solid #f5f5f5; font-weight: 500; }
+        .suggestion-item:hover { background: #f0fdf4; color: var(--earth-dark); }
 
         /* Analysis Cards */
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
@@ -110,30 +80,109 @@
         }
         .stat-card h4 { margin: 0; color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-card .val { font-size: 1.3rem; font-weight: 700; color: var(--text-main); margin-top: 5px; }
-        .stat-card.highlight { background: #E8F5E9; border-color: var(--earth-dark); }
-        .stat-card.highlight .val { color: var(--earth-dark); }
 
         /* File Upload */
         .file-upload-box {
-            background: #f9f9f9;
-            border: 2px dashed #ddd;
-            border-radius: 12px;
-            padding: 10px;
-            text-align: center;
+            background: #f9f9f9; border: 2px dashed #ddd; border-radius: 12px;
+            padding: 10px; text-align: center; cursor: pointer;
         }
 
-        @media (max-width: 900px) {
-            .sell-grid { grid-template-columns: 1fr; }
-            .input-row { grid-template-columns: 1fr; gap: 0; }
-            .analysis-panel { order: -1; margin-bottom: 20px; } 
+        /* ========================================================
+           🌟 PREMIUM MOBILE E-COMMERCE STYLES (Only < 768px) 🌟
+           ======================================================== */
+        .mobile-top-header { display: none; }
+
+        @media (hover: none) {
+            .btn-submit:hover { transform: none !important; background: var(--harvest-gold) !important; }
+            .unit-option:hover { transform: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            .hide-on-mobile { display: none !important; }
+            
+            body { background-color: #f4f7f6; } /* Slight grey background for native app feel */
+            
+            .container { padding: 10px 15px 50px 15px !important; margin-top: 0 !important; max-width: 100% !important; }
+
+            /* 1. Sticky Mobile Header */
+            .mobile-top-header {
+                display: flex !important; justify-content: space-between; align-items: center;
+                padding: 15px 20px; background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+                position: sticky; top: 0; z-index: 4000; box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+            }
+
+            /* 2. Layout Stacking & Order Reversal */
+            .sell-grid { 
+                display: flex !important; 
+                flex-direction: column !important; 
+                gap: 15px !important; 
+            }
+            .input-row { 
+                display: flex !important; 
+                flex-direction: column !important; 
+                gap: 0 !important; 
+            }
+
+            /* CRITICAL: Move Analysis Panel to the Top on Mobile */
+            .analysis-panel { order: -1 !important; }
+
+            /* 3. Panel Refinements */
+            .glass-panel { 
+                padding: 20px !important; 
+                border-radius: 24px !important; 
+                margin-bottom: 0 !important; 
+                box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important; 
+                border: 1px solid #f0f0f0 !important; 
+            }
+            
+            .section-title { font-size: 1.3rem !important; margin-bottom: 20px !important; }
+
+            /* 4. Touch-Friendly Inputs */
+            .input-group input, .input-group select, .input-group textarea {
+                padding: 16px !important; 
+                border-radius: 16px !important; 
+                font-size: 1.05rem !important;
+                background: #fdfdfd !important;
+            }
+            .input-group label { font-size: 0.9rem !important; margin-bottom: 8px !important; color: #555 !important; }
+            .unit-toggle { padding: 6px !important; border-radius: 16px !important; }
+            .unit-option { padding: 12px !important; border-radius: 12px !important; font-size: 0.95rem !important; }
+
+            /* 5. Stat Grid Adjustments */
+            .stat-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
+            .stat-card { padding: 15px 10px !important; border-radius: 16px !important; background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important;}
+            .stat-card h4 { color: rgba(255,255,255,0.7) !important; }
+            .stat-card .val { color: white !important; }
+            
+            /* 6. Big Action Button */
+            .btn-submit { 
+                padding: 20px !important; 
+                font-size: 1.15rem !important; 
+                border-radius: 20px !important; 
+                margin-top: 10px !important; 
+                box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3) !important;
+            }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
+    <!-- MOBILE TOP HEADER -->
+    <div class="mobile-top-header">
+        <a href="{{ url_for('farmer_dashboard') }}" style="color: var(--primary-dark); font-size: 1.2rem; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <div style="color: var(--primary-dark); font-weight: 700; font-size: 1.1rem;">
+            List Crop
+        </div>
+        <div style="width: 20px;"></div> <!-- Spacer -->
+    </div>
+
+    <!-- DESKTOP NAVBAR -->
+    <nav class="navbar hide-on-mobile">
         <div class="logo"><i class="fas fa-leaf"></i> Agri Setu</div>
-        <a href="{{ url_for('farmer_dashboard') }}" class="btn-secondary" style="background: white; color: var(--earth-dark); border: none;">
+        <a href="{{ url_for('farmer_dashboard') }}" class="btn-secondary" style="background: white; color: var(--earth-dark); border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <i class="fas fa-arrow-left"></i> Dashboard
         </a>
     </nav>
@@ -144,7 +193,7 @@
             
             <!-- LEFT: Selling Form -->
             <div class="glass-panel">
-                <h2 class="section-title" style="margin-top: 0;"><i class="fas fa-plus-circle"></i> Sell New Crop</h2>
+                <h2 class="section-title hide-on-mobile" style="margin-top: 0;"><i class="fas fa-plus-circle"></i> Sell New Crop</h2>
                 
                 <form action="{{ url_for('sell_crop') }}" method="POST" enctype="multipart/form-data">
                     
@@ -161,7 +210,7 @@
                         <input type="text" name="location" placeholder="e.g. Warangal, Karimnagar" required>
                     </div>
 
-                    <!-- 3. Category & Unit (Side by Side) -->
+                    <!-- 3. Category & Unit (Side by Side on Desktop) -->
                     <div class="input-row">
                         <div class="input-group">
                             <label>Category</label>
@@ -189,45 +238,48 @@
                         </div>
                     </div>
 
-                    <!-- 4. Price & Stock (Side by Side) -->
+                    <!-- 4. Price & Stock (Side by Side on Desktop) -->
                     <div class="input-row">
                         <div class="input-group">
-                            <label>Price (₹)</label>
+                            <label>Price per Unit (₹)</label>
                             <input type="number" name="price" placeholder="0.00" required>
                         </div>
                         <div class="input-group">
-                            <label>Quantity</label>
-                            <input type="number" name="stock" placeholder="Available Stock" required>
+                            <label>Available Quantity</label>
+                            <input type="number" name="stock" placeholder="e.g. 50" required>
                         </div>
                     </div>
 
                     <!-- 5. Image & Desc -->
                     <div class="input-group">
                         <label>Description</label>
-                        <textarea name="description" rows="3" placeholder="Describe quality..."></textarea>
+                        <textarea name="description" rows="3" placeholder="Describe quality, freshness, organic status..."></textarea>
                     </div>
                     
                     <div class="input-group">
                         <label>Upload Photo</label>
                         <div class="file-upload-box">
-                            <input type="file" name="product_image" accept="image/*" style="width: 100%; border: none;">
+                            <i class="fas fa-cloud-upload-alt fa-2x" style="color: #aaa; margin-bottom: 10px;"></i><br>
+                            <input type="file" name="product_image" accept="image/*" style="width: 100%; border: none; padding: 0 !important; background: transparent !important;">
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-submit" style="width: 100%; margin-top: 10px;">List to Market</button>
+                    <button type="submit" class="btn-submit" style="width: 100%; margin-top: 10px;">
+                        <i class="fas fa-check-circle" style="margin-right: 8px;"></i> List to Market
+                    </button>
                 </form>
             </div>
 
-            <!-- RIGHT: Live Analysis Dashboard -->
+            <!-- RIGHT: Live Analysis Dashboard (Jumps to top on mobile) -->
             <div class="analysis-panel">
-                <div class="glass-panel" style="background: #2E3B4E; color: white;">
-                    <h3 style="color: #FFC107; margin-top: 0;"><i class="fas fa-chart-line"></i> Market Intelligence</h3>
-                    <p style="opacity: 0.8; font-size: 0.9rem;">Real-time data for: <strong id="analyzing-crop">...</strong></p>
+                <div class="glass-panel" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: none;">
+                    <h3 style="color: #FFC107; margin-top: 0; font-size: 1.2rem;"><i class="fas fa-chart-line"></i> Market Intelligence</h3>
+                    <p style="opacity: 0.8; font-size: 0.9rem; margin-bottom: 15px;">Real-time data for: <strong id="analyzing-crop" style="color: white;">...</strong></p>
                     
                     <!-- Filters -->
-                    <div style="margin: 15px 0;">
-                        <select id="areaFilter" onchange="fetchAnalysis()" style="width: 100%; padding: 8px; border-radius: 8px; background: rgba(217, 217, 217, 0.37); color: rgb(0, 0, 0); border: 1px solid rgba(255,255,255,0.2); outline: none;">
-                            <option value="All">All Locations</option>
+                    <div style="margin-bottom: 20px;">
+                        <select id="areaFilter" onchange="fetchAnalysis()" style="width: 100%; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255,255,255,0.2); outline: none; font-size: 0.95rem;">
+                            <option value="All" style="color: black;">All Locations</option>
                         </select>
                     </div>
 
@@ -243,23 +295,23 @@
                         </div>
                         <div class="stat-card">
                             <h4>Lowest</h4>
-                            <div class="val" style="color: green;" id="low-price">-</div>
+                            <div class="val" style="color: #4CAF50;" id="low-price">-</div>
                         </div>
                         <div class="stat-card">
                             <h4>Highest</h4>
-                            <div class="val" style="color: red;" id="high-price">-</div>
+                            <div class="val" style="color: #ef4444;" id="high-price">-</div>
                         </div>
                     </div>
 
                     <!-- Recommendation -->
-                    <div style="background: rgba(255, 193, 7, 0.1); border: 1px dashed #FFC107; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                        <h4 style="color: #FFC107; margin: 0 0 5px 0;">💡 Recommended Price</h4>
-                        <div style="font-size: 1.5rem; font-weight: bold;">₹ <span id="rec-price">0</span></div>
-                        <small style="opacity: 0.8;">Based on current competition</small>
+                    <div style="background: rgba(255, 193, 7, 0.15); border: 1px dashed rgba(255, 193, 7, 0.5); padding: 20px; border-radius: 16px; margin-bottom: 20px; text-align: center;">
+                        <h4 style="color: #FFC107; margin: 0 0 5px 0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">💡 Recommended Price</h4>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: white;">₹ <span id="rec-price">0</span></div>
+                        <small style="opacity: 0.7;">Based on current competition</small>
                     </div>
 
                     <!-- Chart -->
-                    <div style="height: 200px; background: white; padding: 10px; border-radius: 12px;">
+                    <div style="height: 200px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
                         <canvas id="priceChart"></canvas>
                     </div>
                 </div>
@@ -269,147 +321,170 @@
     </div>
 
    <script>
-        // --- 1. UNIT SELECTION UI ---
-        function selectUnit(element) {
-            // Remove active class from all options
-            document.querySelectorAll('.unit-option').forEach(el => el.classList.remove('active'));
-            // Add active class to the clicked option
-            element.classList.add('active');
-            // Check the hidden radio button inside
-            element.querySelector('input').checked = true;
-            
-            // TRIGGER LIVE UPDATE immediately when unit changes
-            fetchAnalysis(); 
-        }
+       // --- 1. UNIT SELECTION UI ---
+       function selectUnit(element) {
+           // Remove active class from all options
+           document.querySelectorAll('.unit-option').forEach(el => el.classList.remove('active'));
+           // Add active class to the clicked option
+           element.classList.add('active');
+           // Check the hidden radio button inside
+           element.querySelector('input').checked = true;
+           
+           // TRIGGER LIVE UPDATE immediately when unit changes
+           fetchAnalysis(); 
+       }
 
-        // --- 2. AUTO COMPLETE LOGIC ---
-        function fetchSuggestions() {
-            let input = document.getElementById('itemName').value;
-            let box = document.getElementById('suggestionBox');
-            
-            if (input.length < 2) {
-                box.style.display = 'none';
-                return;
-            }
+       // --- 2. AUTO COMPLETE LOGIC ---
+       function fetchSuggestions() {
+           let input = document.getElementById('itemName').value;
+           let box = document.getElementById('suggestionBox');
+           
+           if (input.length < 2) {
+               box.style.display = 'none';
+               return;
+           }
 
-            fetch('/api/crop_suggestions?query=' + input)
-            .then(res => res.json())
-            .then(data => {
-                box.innerHTML = '';
-                if (data.length > 0) {
-                    box.style.display = 'block';
-                    data.forEach(item => {
-                        let div = document.createElement('div');
-                        div.className = 'suggestion-item';
-                        div.innerText = item;
-                        div.onclick = function() {
-                            document.getElementById('itemName').value = item;
-                            box.style.display = 'none';
-                            fetchAnalysis(); // Trigger analysis immediately after selection
-                        };
-                        box.appendChild(div);
-                    });
-                } else {
-                    box.style.display = 'none';
-                }
-            });
-        }
+           fetch('/api/crop_suggestions?query=' + input)
+           .then(res => res.json())
+           .then(data => {
+               box.innerHTML = '';
+               if (data.length > 0) {
+                   box.style.display = 'block';
+                   data.forEach(item => {
+                       let div = document.createElement('div');
+                       div.className = 'suggestion-item';
+                       div.innerText = item;
+                       div.onclick = function() {
+                           document.getElementById('itemName').value = item;
+                           box.style.display = 'none';
+                           fetchAnalysis(); // Trigger analysis immediately after selection
+                       };
+                       box.appendChild(div);
+                   });
+               } else {
+                   box.style.display = 'none';
+               }
+           });
+       }
 
-        // --- 3. LIVE MARKET ANALYSIS ---
-        let priceChart = null;
+       // Close suggestions when clicking outside
+       document.addEventListener('click', function(e) {
+           if(e.target.id !== 'itemName') {
+               document.getElementById('suggestionBox').style.display = 'none';
+           }
+       });
 
-        function fetchAnalysis() {
-            let crop = document.getElementById('itemName').value;
-            let location = document.getElementById('areaFilter').value;
-            
-            // GET SELECTED UNIT dynamically
-            let unitElement = document.querySelector('input[name="unit"]:checked');
-            let unit = unitElement ? unitElement.value : 'kg';
-            
-            if(!crop) return;
-            
-            // Update the display text
-            document.getElementById('analyzing-crop').innerText = crop + " (" + unit + ")";
+       // --- 3. LIVE MARKET ANALYSIS ---
+       let priceChart = null;
 
-            // SEND UNIT TO SERVER
-            fetch(`/api/market_analysis?item_name=${crop}&location=${location}&unit=${unit}`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    // Update Stats
-                    document.getElementById('avg-price').innerText = '₹' + data.avg;
-                    document.getElementById('comp-count').innerText = data.competitors;
-                    document.getElementById('low-price').innerText = '₹' + data.min;
-                    document.getElementById('high-price').innerText = '₹' + data.max;
-                    document.getElementById('rec-price').innerText = data.recommended;
+       function fetchAnalysis() {
+           let crop = document.getElementById('itemName').value;
+           let location = document.getElementById('areaFilter').value;
+           
+           // GET SELECTED UNIT dynamically
+           let unitElement = document.querySelector('input[name="unit"]:checked');
+           let unit = unitElement ? unitElement.value : 'kg';
+           
+           if(!crop) return;
+           
+           // Update the display text
+           document.getElementById('analyzing-crop').innerText = crop + " (" + unit + ")";
 
-                    // Update Location Dropdown intelligently
-                    let locSelect = document.getElementById('areaFilter');
-                    if (locSelect.options.length === 1 && data.locations.length > 0) {
-                        data.locations.forEach(loc => {
-                            let opt = document.createElement('option');
-                            opt.value = loc;
-                            opt.innerText = loc;
-                            locSelect.appendChild(opt);
-                        });
-                    }
+           // SEND UNIT TO SERVER
+           fetch(`/api/market_analysis?item_name=${crop}&location=${location}&unit=${unit}`)
+           .then(res => res.json())
+           .then(data => {
+               if(data.status === 'success') {
+                   // Update Stats
+                   document.getElementById('avg-price').innerText = '₹' + data.avg;
+                   document.getElementById('comp-count').innerText = data.competitors;
+                   document.getElementById('low-price').innerText = '₹' + data.min;
+                   document.getElementById('high-price').innerText = '₹' + data.max;
+                   document.getElementById('rec-price').innerText = data.recommended;
 
-                    // Update Chart
-                    updateChart(data.graph_data);
-                } else {
-                    // Reset if no data for THIS unit
-                    document.getElementById('avg-price').innerText = '-';
-                    document.getElementById('comp-count').innerText = '0';
-                    document.getElementById('low-price').innerText = '-';
-                    document.getElementById('high-price').innerText = '-';
-                    document.getElementById('rec-price').innerText = '0';
-                    
-                    // Clear chart if no data
-                    if (priceChart) priceChart.destroy();
-                }
-            });
-        }
+                   // Update Location Dropdown intelligently
+                   let locSelect = document.getElementById('areaFilter');
+                   if (locSelect.options.length === 1 && data.locations.length > 0) {
+                       data.locations.forEach(loc => {
+                           let opt = document.createElement('option');
+                           opt.value = loc;
+                           opt.innerText = loc;
+                           // Fix for dark mode dropdown contrast
+                           opt.style.color = "black";
+                           locSelect.appendChild(opt);
+                       });
+                   }
 
-        function updateChart(prices) {
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            
-            // Generate labels (Seller 1, Seller 2...)
-            const labels = prices.map((_, i) => `Seller ${i+1}`);
+                   // Update Chart
+                   updateChart(data.graph_data);
+               } else {
+                   // Reset if no data for THIS unit
+                   document.getElementById('avg-price').innerText = '-';
+                   document.getElementById('comp-count').innerText = '0';
+                   document.getElementById('low-price').innerText = '-';
+                   document.getElementById('high-price').innerText = '-';
+                   document.getElementById('rec-price').innerText = '0';
+                   
+                   // Clear chart if no data
+                   if (priceChart) priceChart.destroy();
+               }
+           });
+       }
 
-            if (priceChart) priceChart.destroy();
+       function updateChart(prices) {
+           const ctx = document.getElementById('priceChart').getContext('2d');
+           
+           // Generate labels (Seller 1, Seller 2...)
+           const labels = prices.map((_, i) => `Seller ${i+1}`);
 
-            priceChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Market Prices',
-                        data: prices,
-                        borderColor: '#FFC107',
-                        backgroundColor: 'rgba(255, 193, 7, 0.2)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
-                }
-            });
-        }
-    </script>
+           if (priceChart) priceChart.destroy();
 
-    <!-- Google Translate (Background) -->
-    <div id="google_translate_element" style="display:none;"></div>
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-          new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,hi,te,ta,mr,bn,kn', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false }, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+           priceChart = new Chart(ctx, {
+               type: 'line',
+               data: {
+                   labels: labels,
+                   datasets: [{
+                       label: 'Market Prices',
+                       data: prices,
+                       borderColor: '#FFC107',
+                       backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                       borderWidth: 2,
+                       fill: true,
+                       tension: 0.4,
+                       pointBackgroundColor: '#fff',
+                       pointBorderColor: '#FFC107',
+                       pointRadius: 4
+                   }]
+               },
+               options: {
+                   responsive: true,
+                   maintainAspectRatio: false,
+                   plugins: { legend: { display: false } },
+                   scales: { 
+                       y: { 
+                           beginAtZero: true,
+                           grid: { color: 'rgba(255,255,255,0.1)' },
+                           ticks: { color: 'rgba(255,255,255,0.7)' }
+                       },
+                       x: {
+                           grid: { display: false },
+                           ticks: { color: 'rgba(255,255,255,0.7)' }
+                       }
+                   }
+               }
+           });
+       }
+   </script>
+
+   <!-- Google Translate (Background) -->
+   <div id="google_translate_element" style="display:none;"></div>
+   <script type="text/javascript">
+       function googleTranslateElementInit() {
+         new google.translate.TranslateElement({ pageLanguage: 'en', includedLanguages: 'en,hi,te,ta,mr,bn,kn', layout: google.translate.TranslateElement.InlineLayout.SIMPLE, autoDisplay: false }, 'google_translate_element');
+       }
+   </script>
+   <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+   <script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 </html>

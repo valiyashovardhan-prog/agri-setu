@@ -2,18 +2,204 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Order Confirmed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Order Confirmed | Agri Setu</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body style="display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center;">
+    <style>
+        /* --- PAGE LAYOUT --- */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #F5F7F8 0%, #E8F5E9 100%);
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
 
-    <div class="glass-panel" style="padding: 60px;">
-        <i class="fas fa-check-circle fa-5x" style="color: var(--primary-main); margin-bottom: 20px;"></i>
-        <h1 style="color: var(--primary-dark);">Order Placed!</h1>
-        <p style="margin: 20px 0; color: #666;">Thank you for supporting local farmers.</p>
-        <a href="{{ url_for('consumer_dashboard') }}" class="btn-submit" style="text-decoration: none; display: inline-block;">Back to Home</a>
+        /* --- THE SUCCESS CARD --- */
+        .success-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 50px 40px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+            width: 90%;
+            max-width: 450px;
+            
+            /* Card Entrance Animation */
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* --- ANIMATED ICON --- */
+        .icon-circle {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32); /* Hardcoded colors to bypass cache */
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px auto;
+            color: white;
+            font-size: 3rem;
+            box-shadow: 0 10px 25px rgba(46, 125, 50, 0.3);
+            
+            /* Icon Entrance */
+            transform: scale(0);
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s forwards;
+        }
+
+        .icon-circle i {
+            /* Forced visibility to fix the blank circle issue */
+            opacity: 1 !important; 
+            transform: scale(1) !important;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1 {
+            color: #2E7D32;
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+            font-weight: 800;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: slideUpFade 0.5s ease forwards 0.5s;
+        }
+
+        p {
+            color: #666;
+            margin: 0 0 35px 0;
+            font-size: 1rem;
+            line-height: 1.5;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: slideUpFade 0.5s ease forwards 0.6s;
+        }
+
+        /* --- BUTTONS --- */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: slideUpFade 0.5s ease forwards 0.7s;
+        }
+
+        .action-buttons a {
+            flex: 1;
+            padding: 15px;
+            border-radius: 16px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-track {
+            background: #FFC107;
+            color: #3e2723;
+            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+        }
+        
+        .btn-home {
+            background: #f3f4f6;
+            color: #2E7D32;
+            border: 1px solid #e5e7eb;
+        }
+
+        .action-buttons a:hover { transform: translateY(-3px); }
+        .btn-track:hover { box-shadow: 0 12px 25px rgba(255, 193, 7, 0.4); }
+
+        /* --- KEYFRAMES --- */
+        @keyframes slideUpFade {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* --- MOBILE STYLES --- */
+        @media (hover: none) {
+            .action-buttons a:hover { transform: none !important; }
+            .action-buttons a:active { transform: scale(0.96) !important; }
+        }
+
+        @media (max-width: 768px) {
+            .success-card { padding: 40px 25px; border-radius: 24px; }
+            h1 { font-size: 1.8rem; }
+            .action-buttons { flex-direction: column; gap: 12px; }
+            .action-buttons a { width: 100%; padding: 16px; }
+        }
+        
+        /* Floating background decoration */
+        .confetti {
+            position: absolute; width: 10px; height: 10px; background: #FFC107;
+            border-radius: 50%; opacity: 0;
+            animation: floatUp 3s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-150px) scale(0) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="confetti-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;"></div>
+
+    <div class="success-card">
+        <div class="icon-circle">
+            <i class="fas fa-check"></i>
+        </div>
+        
+        <h1>Order Placed!</h1>
+        <p>Your harvest is secured. Thank you for supporting our local farming community.</p>
+        
+        <div class="action-buttons">
+            <a href="{{ url_for('my_orders') }}" class="btn-track">
+                <i class="fas fa-box"></i> View Order
+            </a>
+            <a href="{{ url_for('consumer_dashboard') }}" class="btn-home">
+                <i class="fas fa-store"></i> Market
+            </a>
+        </div>
     </div>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const container = document.getElementById('confetti-container');
+            const colors = ['#FFC107', '#4CAF50', '#0288D1', '#8d6e63'];
+            
+            for(let i=0; i<15; i++) {
+                let conf = document.createElement('div');
+                conf.className = 'confetti';
+                
+                conf.style.left = (40 + Math.random() * 20) + 'vw';
+                conf.style.top = (50 + Math.random() * 10) + 'vh';
+                conf.style.background = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.animationDelay = (0.5 + Math.random() * 0.5) + 's';
+                
+                let xMove = (Math.random() - 0.5) * 200;
+                conf.style.transform = `translateX(${xMove}px)`;
+                
+                container.appendChild(conf);
+            }
+        });
+    </script>
 </body>
 </html>
