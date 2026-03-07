@@ -168,8 +168,9 @@
                 <div class="p-details" style="padding: 20px;">
                     <div style="font-size: 0.75rem; text-transform: uppercase; color: #888; margin-bottom: 5px; font-weight: 600;">{{ item.category }}</div>
                     <h3 style="margin: 0 0 10px 0; color: #222;">{{ item.item_name }}</h3>
-                    <div class="p-price" style="color: var(--earth-dark); font-weight: 700; font-size: 1.3rem; margin-bottom: 5px;">₹{{ item.price }} <span style="font-size: 0.8rem; color: #888; font-weight: normal;">/kg</span></div>
-                    <p style="color: #666; font-size: 0.85rem; margin: 0; background: #f9f9f9; padding: 5px 10px; border-radius: 8px; display: inline-block;">Stock: <strong>{{ item.stock }}kg</strong></p>
+                    <!-- DYNAMIC UNIT DISPLAY UPDATED -->
+                    <div class="p-price" style="color: var(--earth-dark); font-weight: 700; font-size: 1.3rem; margin-bottom: 5px;">₹{{ item.price }} <span style="font-size: 0.8rem; color: #888; font-weight: normal;">/{{ item.unit }}</span></div>
+                    <p style="color: #666; font-size: 0.85rem; margin: 0; background: #f9f9f9; padding: 5px 10px; border-radius: 8px; display: inline-block;">Stock: <strong>{{ item.stock }} {{ item.unit }}</strong></p>
                 </div>
             </div>
             {% else %}

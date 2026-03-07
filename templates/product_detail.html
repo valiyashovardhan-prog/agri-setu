@@ -225,7 +225,7 @@
                 <!-- DESKTOP ACTION AREA (Hidden on Mobile) -->
                 <div class="desktop-action-area">
                     <div style="font-size: 2rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 20px;">
-                        ₹{{ product.price }} <span style="font-size: 1rem; color: #999; font-weight: 400;">/ kg</span>
+                        ₹{{ product.price }} <span style="font-size: 1rem; color: #999; font-weight: 400;">/ {{ product.unit }}</span>
                     </div>
                 </div>
 
@@ -234,7 +234,7 @@
                 <div style="padding: 20px; background: #f0fdf4; border-radius: 15px; margin-bottom: 30px; border: 1px solid #d1fae5; display: flex; align-items: center; gap: 15px;">
                     <i class="fas fa-box-open" style="color: var(--earth-dark); font-size: 1.5rem;"></i>
                     <div>
-                        <strong style="color: var(--earth-dark);">In Stock:</strong> <span style="color: #555;">{{ product.stock }} kg available for immediate order.</span>
+                        <strong style="color: var(--earth-dark);">In Stock:</strong> <span style="color: #555;">{{ product.stock }} {{ product.unit }} available for immediate order.</span>
                     </div>
                 </div>
 
@@ -277,7 +277,7 @@
     <div class="mobile-bottom-bar">
         <div class="mobile-price-col">
             <span>Total Price</span>
-            <div><strong>₹{{ product.price }}</strong> <small>/ kg</small></div>
+            <div><strong>₹{{ product.price }}</strong> <small>/ {{ product.unit }}</small></div>
         </div>
         
         <button onclick="addToCart({{ product.id }})" class="btn-submit">

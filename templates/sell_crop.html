@@ -9,8 +9,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ========================================================
-           DESKTOP STYLES (Your Original Layout)
+           DESKTOP STYLES
            ======================================================== */
+        html, body {
+            overflow-x: hidden; /* Prevents layout breaking entirely */
+        }
+        
         .sell-grid {
             display: grid;
             grid-template-columns: 1.5fr 1fr;
@@ -28,6 +32,7 @@
         .input-group {
             margin-bottom: 20px;
             position: relative;
+            max-width: 100%;
         }
 
         .input-group label {
@@ -40,25 +45,38 @@
             border: 2px solid #e0e0e0; border-radius: 12px;
             font-size: 1rem; outline: none; transition: border-color 0.3s;
             background: #fff; font-family: inherit;
+            box-sizing: border-box;
         }
 
         .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
             border-color: var(--earth-dark);
         }
 
-        /* Unit Toggle Switch */
+        /* --- NEW: Scrollable Pill UI for Units --- */
         .unit-toggle { 
-            display: flex; gap: 5px; background: #f5f5f5; 
-            padding: 5px; border-radius: 12px; border: 1px solid #e0e0e0;
+            display: flex; gap: 8px; background: transparent; 
+            overflow-x: auto; padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+            width: 100%;
+            max-width: 100%;
         }
+        .unit-toggle::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+        
         .unit-option {
-            flex: 1; padding: 8px; text-align: center; cursor: pointer;
-            border-radius: 8px; font-size: 0.85rem; font-weight: 600; 
-            color: #666; transition: 0.3s;
+            flex: 0 0 auto; /* Prevents shrinking */
+            padding: 10px 20px; text-align: center; cursor: pointer;
+            border-radius: 20px; font-size: 0.9rem; font-weight: 600; 
+            color: #555; background: #f0f0f0; border: 1px solid #e0e0e0;
+            transition: 0.2s;
         }
+        
+        /* ABSOLUTE FIX: Hardcoded colors to bypass cache and guarantee visibility */
         .unit-option.active { 
-            background: white; color: var(--earth-dark); 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+            background-color: #2E7D32 !important; 
+            color: #ffffff !important; 
+            border-color: #2E7D32 !important;
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3) !important; 
         }
         .hidden-radio { display: none; }
 
@@ -84,7 +102,7 @@
         /* File Upload */
         .file-upload-box {
             background: #f9f9f9; border: 2px dashed #ddd; border-radius: 12px;
-            padding: 10px; text-align: center; cursor: pointer;
+            padding: 10px; text-align: center; cursor: pointer; box-sizing: border-box;
         }
 
         /* ========================================================
@@ -100,11 +118,10 @@
         @media (max-width: 768px) {
             .hide-on-mobile { display: none !important; }
             
-            body { background-color: #f4f7f6; } /* Slight grey background for native app feel */
+            body { background-color: #f4f7f6; overflow-x: hidden !important; } 
             
-            .container { padding: 10px 15px 50px 15px !important; margin-top: 0 !important; max-width: 100% !important; }
+            .container { padding: 10px 15px 50px 15px !important; margin-top: 0 !important; width: 100% !important; max-width: 100vw !important; overflow-x: hidden !important; box-sizing: border-box; }
 
-            /* 1. Sticky Mobile Header */
             .mobile-top-header {
                 display: flex !important; justify-content: space-between; align-items: center;
                 padding: 15px 20px; background: rgba(255, 255, 255, 0.9);
@@ -112,57 +129,29 @@
                 position: sticky; top: 0; z-index: 4000; box-shadow: 0 2px 15px rgba(0,0,0,0.04);
             }
 
-            /* 2. Layout Stacking & Order Reversal */
-            .sell-grid { 
-                display: flex !important; 
-                flex-direction: column !important; 
-                gap: 15px !important; 
-            }
-            .input-row { 
-                display: flex !important; 
-                flex-direction: column !important; 
-                gap: 0 !important; 
-            }
-
-            /* CRITICAL: Move Analysis Panel to the Top on Mobile */
-            .analysis-panel { order: -1 !important; }
-
-            /* 3. Panel Refinements */
-            .glass-panel { 
-                padding: 20px !important; 
-                border-radius: 24px !important; 
-                margin-bottom: 0 !important; 
-                box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important; 
-                border: 1px solid #f0f0f0 !important; 
-            }
+            .sell-grid { display: flex !important; flex-direction: column !important; gap: 15px !important; width: 100%; box-sizing: border-box; }
+            .input-row { display: flex !important; flex-direction: column !important; gap: 0 !important; width: 100%; box-sizing: border-box; }
             
+            /* Move Analysis Panel to the Top on Mobile */
+            .analysis-panel { order: -1 !important; width: 100%; box-sizing: border-box; }
+
+            .glass-panel { padding: 20px !important; border-radius: 24px !important; margin-bottom: 0 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important; border: 1px solid #f0f0f0 !important; width: 100%; box-sizing: border-box; }
             .section-title { font-size: 1.3rem !important; margin-bottom: 20px !important; }
 
-            /* 4. Touch-Friendly Inputs */
             .input-group input, .input-group select, .input-group textarea {
-                padding: 16px !important; 
-                border-radius: 16px !important; 
-                font-size: 1.05rem !important;
-                background: #fdfdfd !important;
+                padding: 16px !important; border-radius: 16px !important; font-size: 1.05rem !important; background: #fdfdfd !important;
             }
             .input-group label { font-size: 0.9rem !important; margin-bottom: 8px !important; color: #555 !important; }
-            .unit-toggle { padding: 6px !important; border-radius: 16px !important; }
-            .unit-option { padding: 12px !important; border-radius: 12px !important; font-size: 0.95rem !important; }
-
-            /* 5. Stat Grid Adjustments */
+            
+            /* Ensures the unit toggle bar doesn't cause horizontal scrolling */
+            .unit-toggle { max-width: calc(100vw - 70px) !important; }
+            
             .stat-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
             .stat-card { padding: 15px 10px !important; border-radius: 16px !important; background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.1) !important;}
             .stat-card h4 { color: rgba(255,255,255,0.7) !important; }
             .stat-card .val { color: white !important; }
             
-            /* 6. Big Action Button */
-            .btn-submit { 
-                padding: 20px !important; 
-                font-size: 1.15rem !important; 
-                border-radius: 20px !important; 
-                margin-top: 10px !important; 
-                box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3) !important;
-            }
+            .btn-submit { padding: 20px !important; font-size: 1.15rem !important; border-radius: 20px !important; margin-top: 10px !important; box-shadow: 0 8px 25px rgba(255, 193, 7, 0.3) !important; width: 100%; box-sizing: border-box; }
         }
     </style>
 </head>
@@ -193,64 +182,78 @@
             
             <!-- LEFT: Selling Form -->
             <div class="glass-panel">
-                <h2 class="section-title hide-on-mobile" style="margin-top: 0;"><i class="fas fa-plus-circle"></i> Sell New Crop</h2>
+                <h2 class="section-title hide-on-mobile" style="margin-top: 0;"><i class="fas fa-plus-circle"></i> Sell New Product</h2>
                 
                 <form action="{{ url_for('sell_crop') }}" method="POST" enctype="multipart/form-data">
                     
                     <!-- 1. Smart Name Input -->
                     <div class="input-group" id="POINT_NAME">
-                        <label>Crop Name</label>
-                        <input type="text" name="item_name" id="itemName" placeholder="Type crop name (e.g. Tomato)..." required autocomplete="off" onkeyup="fetchSuggestions()">
+                        <label>Crop / Product Name</label>
+                        <input type="text" name="item_name" id="itemName" placeholder="e.g. Red Chilli Powder, Tomato, Wheat..." required autocomplete="off" onkeyup="fetchSuggestions()">
                         <div id="suggestionBox" class="suggestions-box"></div>
                     </div>
 
-                    <!-- 2. Location (For filtering) -->
+                    <!-- 2. Location -->
                     <div class="input-group">
-                        <label>Harvest Location (District/Area)</label>
+                        <label>Farm / Harvest Location</label>
                         <input type="text" name="location" placeholder="e.g. Warangal, Karimnagar" required>
                     </div>
 
-                    <!-- 3. Category & Unit (Side by Side on Desktop) -->
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Category</label>
-                            <select name="category" required>
-                                <option value="Veg">Vegetables</option>
-                                <option value="Fruit">Fruits</option>
-                                <option value="Grain">Grains</option>
-                                <option value="Waste">Agri-Waste</option>
-                            </select>
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Selling Unit</label>
-                            <div class="unit-toggle">
-                                <label class="unit-option active" onclick="selectUnit(this)">
-                                    Kg <input type="radio" name="unit" value="kg" checked class="hidden-radio">
-                                </label>
-                                <label class="unit-option" onclick="selectUnit(this)">
-                                    Quintal <input type="radio" name="unit" value="quintal" class="hidden-radio">
-                                </label>
-                                <label class="unit-option" onclick="selectUnit(this)">
-                                    Dozen <input type="radio" name="unit" value="dozen" class="hidden-radio">
-                                </label>
-                            </div>
+                    <!-- 3. Category -->
+                    <div class="input-group">
+                        <label>Category</label>
+                        <select name="category" required>
+                            <option value="" disabled selected>Select a category...</option>
+                            <option value="Veg">🥦 Vegetables (Sabzi)</option>
+                            <option value="Fruit">🍎 Fruits (Phal)</option>
+                            <option value="Grain">🌾 Grains & Pulses (Anaaj/Dal)</option>
+                            <option value="Spice">🌶️ Spices (Masala/Turmeric)</option>
+                            <option value="Packaged">📦 Packaged (Flour/Pickle/Jaggery)</option>
+                            <option value="Waste">🍂 Agri-Waste (Fodder/Stubble)</option>
+                        </select>
+                    </div>
+
+                    <!-- 4. Selling Unit (Scrollable UI) -->
+                    <div class="input-group">
+                        <label>Selling Unit <small style="color:#888; font-weight:normal;">(Swipe to see more)</small></label>
+                        <div class="unit-toggle">
+                            <label class="unit-option active" onclick="selectUnit(this)">
+                                Kg <input type="radio" name="unit" value="kg" checked class="hidden-radio">
+                            </label>
+                            <label class="unit-option" onclick="selectUnit(this)">
+                                Grams <input type="radio" name="unit" value="g" class="hidden-radio">
+                            </label>
+                            <label class="unit-option" onclick="selectUnit(this)">
+                                Quintal <input type="radio" name="unit" value="quintal" class="hidden-radio">
+                            </label>
+                            <label class="unit-option" onclick="selectUnit(this)">
+                                Tonnes <input type="radio" name="unit" value="tonne" class="hidden-radio">
+                            </label>
+                            <label class="unit-option" onclick="selectUnit(this)">
+                                Packet <input type="radio" name="unit" value="packet" class="hidden-radio">
+                            </label>
+                            <label class="unit-option" onclick="selectUnit(this)">
+                                Piece <input type="radio" name="unit" value="piece" class="hidden-radio">
+                            </label>
+                            <label class="unit-option" onclick="selectUnit(this)">
+                                Dozen <input type="radio" name="unit" value="dozen" class="hidden-radio">
+                            </label>
                         </div>
                     </div>
 
-                    <!-- 4. Price & Stock (Side by Side on Desktop) -->
+                    <!-- 5. Price & Stock (Side by Side) -->
                     <div class="input-row">
                         <div class="input-group">
-                            <label>Price per Unit (₹)</label>
+                            <label>Price (₹) <small style="color:#888; font-weight:normal;" id="price-unit-label">per Kg</small></label>
                             <input type="number" name="price" placeholder="0.00" required>
                         </div>
                         <div class="input-group">
-                            <label>Available Quantity</label>
+                            <label>Available Stock</label>
                             <input type="number" name="stock" placeholder="e.g. 50" required>
                         </div>
                     </div>
 
-                    <!-- 5. Image & Desc -->
+                    <!-- 6. Image & Desc -->
                     <div class="input-group">
                         <label>Description</label>
                         <textarea name="description" rows="3" placeholder="Describe quality, freshness, organic status..."></textarea>
@@ -264,13 +267,13 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-submit" style="width: 100%; margin-top: 10px;">
+                    <button type="submit" class="btn-submit">
                         <i class="fas fa-check-circle" style="margin-right: 8px;"></i> List to Market
                     </button>
                 </form>
             </div>
 
-            <!-- RIGHT: Live Analysis Dashboard (Jumps to top on mobile) -->
+            <!-- RIGHT: Live Analysis Dashboard -->
             <div class="analysis-panel">
                 <div class="glass-panel" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border: none;">
                     <h3 style="color: #FFC107; margin-top: 0; font-size: 1.2rem;"><i class="fas fa-chart-line"></i> Market Intelligence</h3>
@@ -323,14 +326,16 @@
    <script>
        // --- 1. UNIT SELECTION UI ---
        function selectUnit(element) {
-           // Remove active class from all options
            document.querySelectorAll('.unit-option').forEach(el => el.classList.remove('active'));
-           // Add active class to the clicked option
            element.classList.add('active');
-           // Check the hidden radio button inside
-           element.querySelector('input').checked = true;
            
-           // TRIGGER LIVE UPDATE immediately when unit changes
+           const radio = element.querySelector('input');
+           radio.checked = true;
+           
+           // Update the price label dynamically (e.g. changes "per Kg" to "per Packet")
+           const unitName = element.innerText.trim();
+           document.getElementById('price-unit-label').innerText = "per " + unitName;
+           
            fetchAnalysis(); 
        }
 
@@ -357,7 +362,7 @@
                        div.onclick = function() {
                            document.getElementById('itemName').value = item;
                            box.style.display = 'none';
-                           fetchAnalysis(); // Trigger analysis immediately after selection
+                           fetchAnalysis(); 
                        };
                        box.appendChild(div);
                    });
@@ -367,7 +372,6 @@
            });
        }
 
-       // Close suggestions when clicking outside
        document.addEventListener('click', function(e) {
            if(e.target.id !== 'itemName') {
                document.getElementById('suggestionBox').style.display = 'none';
@@ -381,51 +385,40 @@
            let crop = document.getElementById('itemName').value;
            let location = document.getElementById('areaFilter').value;
            
-           // GET SELECTED UNIT dynamically
            let unitElement = document.querySelector('input[name="unit"]:checked');
            let unit = unitElement ? unitElement.value : 'kg';
            
            if(!crop) return;
            
-           // Update the display text
            document.getElementById('analyzing-crop').innerText = crop + " (" + unit + ")";
 
-           // SEND UNIT TO SERVER
            fetch(`/api/market_analysis?item_name=${crop}&location=${location}&unit=${unit}`)
            .then(res => res.json())
            .then(data => {
                if(data.status === 'success') {
-                   // Update Stats
                    document.getElementById('avg-price').innerText = '₹' + data.avg;
                    document.getElementById('comp-count').innerText = data.competitors;
                    document.getElementById('low-price').innerText = '₹' + data.min;
                    document.getElementById('high-price').innerText = '₹' + data.max;
                    document.getElementById('rec-price').innerText = data.recommended;
 
-                   // Update Location Dropdown intelligently
                    let locSelect = document.getElementById('areaFilter');
                    if (locSelect.options.length === 1 && data.locations.length > 0) {
                        data.locations.forEach(loc => {
                            let opt = document.createElement('option');
                            opt.value = loc;
                            opt.innerText = loc;
-                           // Fix for dark mode dropdown contrast
                            opt.style.color = "black";
                            locSelect.appendChild(opt);
                        });
                    }
-
-                   // Update Chart
                    updateChart(data.graph_data);
                } else {
-                   // Reset if no data for THIS unit
                    document.getElementById('avg-price').innerText = '-';
                    document.getElementById('comp-count').innerText = '0';
                    document.getElementById('low-price').innerText = '-';
                    document.getElementById('high-price').innerText = '-';
                    document.getElementById('rec-price').innerText = '0';
-                   
-                   // Clear chart if no data
                    if (priceChart) priceChart.destroy();
                }
            });
@@ -433,8 +426,6 @@
 
        function updateChart(prices) {
            const ctx = document.getElementById('priceChart').getContext('2d');
-           
-           // Generate labels (Seller 1, Seller 2...)
            const labels = prices.map((_, i) => `Seller ${i+1}`);
 
            if (priceChart) priceChart.destroy();
@@ -476,7 +467,6 @@
        }
    </script>
 
-   <!-- Google Translate (Background) -->
    <div id="google_translate_element" style="display:none;"></div>
    <script type="text/javascript">
        function googleTranslateElementInit() {
